@@ -1,7 +1,14 @@
 # Import socket module
 import socket
 
+class Player():
+    
+	def __init__(self, x, y, color=(255,0,0)) -> None:
+		self.x = x
+		self.y = y
+		self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
+"""
 def Main():
 	# local host IP '127.0.0.1'
     # stan ip : 172.21.72.136
@@ -40,3 +47,4 @@ def Main():
 
 if __name__ == '__main__':
 	Main()
+"""
