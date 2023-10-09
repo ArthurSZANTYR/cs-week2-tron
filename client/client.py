@@ -1,12 +1,26 @@
 # Import socket module
 import socket
 
+###################
+
+#'stan ip' : 172.21.72.136
+host_ip = '172.21.72.136'
+port = 12345
+
+###################
+
 class Player():
     
-	def __init__(self, x, y, color=(255,0,0)) -> None:
+	def __init__(self, x, y, direction, color=(255,0,0)) -> None:
 		self.x = x
 		self.y = y
+		self.direction = direction #haut, bas, gauche, droite
 		self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+		self.s.connect((host_ip, port))
+
+	def input(self): #return new direction
+		new_dir = 
 
 """
 def Main():
