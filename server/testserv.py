@@ -34,7 +34,7 @@ class Game:
                 player.id,
                 player.x,
                 player.y,
-                player.ds
+                player.d
             }
             player_data_json = json.dumps(player_data)
 
