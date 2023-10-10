@@ -29,18 +29,21 @@ class Game:
         self.plateau = []
 
     def send_game_state_to_clients(self):
-        players_data = ";".join(
-            f"{player.id},{player.x},{player.y},{player.d}"
+        players_data = {
+            player.id: (player.x, player.y, player.d)
             for player in self.players
-        )
-        players_data += "!"
-    
+        }
+
+        players_data_json = json.dumps(players_data)  # Convertir en JSON
+
         for client in connected_clients:
             try:
-                client.send(players_data.encode("utf-8"))
+                client.send(players_data_json.encode("utf-8"))
             except Exception as e:
                 print(e)
                 connected_clients.remove(client)
+
+
 
 
 
@@ -58,21 +61,20 @@ class Game:
             x = 20 + i * off  # Répartissez les joueurs équitablement
             self.players.append(Player(x=x, y=0, d="h", id=i + 1))
 
-    def broadcast_game_state(self):
-        game_state = {
-            "players": [
-                {"id": player.id, "x": player.x, "y": player.y, "d": player.d}
-                for player in self.players
-            ],
-        }
-        game_state_json = json.dumps(game_state)
+    def send_game_state_to_clients(self):
+        players_data = ";".join(
+            f"{player.id},{player.x},{player.y},{player.d}"
+            for player in self.players
+        )
+        players_data += "!"
 
         for client in connected_clients:
             try:
-                client.send(game_state_json.encode("utf-8"))
+                client.send(players_data.encode("utf-8"))
             except Exception as e:
                 print(e)
                 connected_clients.remove(client)
+
 
 
     def deplacement(self, player):
@@ -101,27 +103,6 @@ class Game:
 
         return False
 
-   # def Jeu(self):
-   #     while True:
-   #         # Heure de départ de la boucle
-   #         start_time = time.time()
-   #         # Votre logique de jeu ici
-   #         for player in self.players:
-   #             if not self.deplacement(player):
-   #                 # Le joueur n'a pas rencontré de collision, continuez le mouvement
-   #                 pass
-   #             else:
-   #                 # Collision, le joueur est éliminé ou doit être géré
-   #                 pass
-   #         # Envoi des informations du jeu à tous les clients
-   #         self.broadcast_game_state()
-   #         # Heure de fin de la boucle
-   #         end_time = time.time()
-#
-   #         # Calcul du temps d'attente pour atteindre la fréquence souhaitée
-   #         elapsed_time = end_time - start_time
-   #         sleep_time = max(0, delta_time - elapsed_time)
-   #         time.sleep(sleep_time)
 
 
 
@@ -182,7 +163,7 @@ def Main():
     game = Game()
 
     def Complet():
-        if len(connected_clients) == 2:
+        if len(connected_clients) == 1:
             return False
         return True
     
