@@ -57,10 +57,9 @@ class Player():
 p1 = Player(1,0,2,"R")
 
 
+while True:
+	p1.send_to_server(p1.data_network_format())
 
-while true:
-
-p1.send_to_server(p1.data_network_format())
 p1.send_to_server(p1.data_network_format())
 p1.send_to_server(p1.data_network_format())
 
