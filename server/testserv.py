@@ -29,22 +29,21 @@ class Game:
         self.plateau = []
 
     def send_game_state_to_clients(self):
-        for player in self.players:
-            player_data = {
-                player.id,
-                player.x,
-                player.y,
-                player.d
-            }
-            player_data_json = json.dumps(player_data)
+        players_data = ";".join(
+            f"{player.id},{player.x},{player.y},{player.d}"
+            for player in self.players
+        )
+        players_data += "!"
+    
+        for client in connected_clients:
+            try:
+                client.send(players_data.encode("utf-8"))
+            except Exception as e:
+                print(e)
+                connected_clients.remove(client)
 
-            for client in connected_clients:
-                try:
-                    client.send(player_data_json.encode("utf-8"))
-                    #client.flush()
-                except Exception as e:
-                    print(e)
-                    connected_clients.remove(client)
+
+
 
 
     def new_game(self):
@@ -183,7 +182,7 @@ def Main():
     game = Game()
 
     def Complet():
-        if len(connected_clients) == 1:
+        if len(connected_clients) == 2:
             return False
         return True
     
