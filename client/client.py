@@ -73,7 +73,20 @@ class Fenetre:
 #    player_data = {1: (random.randrange(0,40), random.randrange(0,40)), 2: (random.randrange(0,40), random.randrange(0+1,40-1))}  # Exemple de nouvelles données de joueurs
 #    print(player_data)
 #    f.render_matrix()
-#   time.sleep(1)
+#    time.sleep(1)
+
+def decrypt_data(data):
+    lines = data.split(';')
+    positions = {}
+
+    for line in lines:
+        elements = line.split(',')
+        key = int(elements[0])
+        values = tuple(elements[1:])
+        positions[key] = values
+
+    return positions
+
 
 def run():
     c = Client()
@@ -82,13 +95,17 @@ def run():
     #print("rayyy")
     i=0
     while True:
-        send_to_server(c.client_socket, "hello stanos")
+        #send_to_server(c.client_socket, "hello stanos")
         data = c.client_socket.recv(1024)  # 1024 est la taille du tampon, ajustez-la en fonction de vos besoins
         if not data:
             break
-        print("Message reçu du serveur :", data.decode()) 
-        print(i+1) 
-        print("")
+        #print("Message reçu du serveur :", data.decode()) 
+
+        player_data = decrypt_data(data.decode())
+        print(player_data[1])
+        
+
+        
 
     #wait "start" from server
 
