@@ -3,6 +3,8 @@ import socket
 import pygame
 import sys
 import time
+import random
+import numpy as np 
 
 ###################
 
@@ -34,28 +36,43 @@ def get_new_direction():
                 return "D"
     return None
 
+# Créez un dictionnaire associant des nombres de 1 à 20 à des couleurs aléatoires
+color_dict = {i: (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(1, 21)}
+
 class Fenetre:
-    def __init__(self, largeur=400, hauteur=400) -> None:
+    def __init__(self, n=3, largeur=400, hauteur=400) -> None:
         self.largeur = largeur
         self.hauteur = hauteur
         self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
-        self.matrice = [[0, 0, 0],
-                        [0, 1, 0],
-                        [0, 0, 0]]
+        self.matrice = np.zeros((40, 40), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
+
 
     def render_matrix(self):
+        # Remplir l'écran avec une couleur blanche
+        self.fenetre.fill((255, 255, 255))
+
+        # Mettre id des joueurs sur la matrice
+        for player_id, (x, y) in player_data.items():
+            self.matrice[y][x] = player_id
+
         # Boucle pour parcourir la matrice et dessiner les cellules
         for i in range(len(self.matrice)):
             for j in range(len(self.matrice[i])):
-                cellule = self.matrice[i][j]
-                couleur = (255, 0, 0) if cellule == 1 else (255, 255, 255)  # Par exemple, 1 pour blanc et 0 pour noir
-                pygame.draw.rect(self.fenetre, couleur, (j * 100, i * 100, 100, 100))
+                position = self.matrice[i][j]
+                if position != 0:
+                    pygame.draw.rect(self.fenetre, color_dict[position], (j * 10, i * 10, 10, 10))
         pygame.display.flip()
 
 f = Fenetre()
 while True:
+    # Supposer que vous recevez les nouvelles positions des joueurs du serveur sous forme de dictionnaire
+    player_data = {1: (random.randrange(0,40), random.randrange(0,40)), 2: (random.randrange(0,40), random.randrange(0+1,40-1))}  # Exemple de nouvelles données de joueurs
+    print(player_data)
     f.render_matrix()
-    time.sleep(1/25)
+    time.sleep(1)
+
+
+    
 
 
 			
