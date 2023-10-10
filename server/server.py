@@ -7,23 +7,29 @@ print_lock = threading.Lock()
 connected_clients = []  # Une liste pour stocker les clients connectés
 
 # Fonction de gestion de thread
-def threaded(c):
+def threaded(c : socket):
     global connected_clients  # Utilisez la liste globale des clients connectés
+#s.getsockname
+    try: 
+        while True:
+            data = c.recv(1024)
+            if(len(data) == 0): 
+                print("client disconnected")
+                connected_clients.remove(c)
+                break
 
-    while True:
-        data = c.recv(1024)
-        if not data:
-            print('Client déconnecté')
-            connected_clients.remove(c)  # Retirez le client de la liste lorsqu'il se déconnecte
-            break
+            print(data.decode())            
 
-        data = data[::-1]
-        c.send(data)
+    except ConnectionResetError:
+        print("client disconnected")
+        connected_clients.remove(c)
 
 def Main():
+
     host = "172.21.72.136"
-    port = 7777
+    port = 7778
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((host, port))
     print("Socket lié au port", port)
     s.listen(5)
@@ -39,8 +45,13 @@ def Main():
         connected_clients.append(c)  # Ajoutez le client à la liste des clients connectés
         start_new_thread(threaded, (c,))
         print_lock.release()
-      
-    s.close()
+    
+
+        
+
+
+
+       # s.close()
 
 if __name__ == '__main__':
     Main()
