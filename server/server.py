@@ -15,20 +15,22 @@ def threaded(c):
         if not data:
             print('Client déconnecté')
             connected_clients.remove(c)  # Retirez le client de la liste lorsqu'il se déconnecte
-            print_lock.release()
             break
 
         data = data[::-1]
         c.send(data)
 
 def Main():
-    host = ""
-    port = 12345
+    host = "172.21.72.136"
+    port = 7777
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
     print("Socket lié au port", port)
     s.listen(5)
     print("Socket en écoute")
+
+    print("Clients connectés :", connected_clients)  # Afficher la liste des clients connectés
+
 
     while True:
         c, addr = s.accept()
@@ -36,15 +38,18 @@ def Main():
         print('Connecté à :', addr[0], ':', addr[1])
         connected_clients.append(c)  # Ajoutez le client à la liste des clients connectés
         start_new_thread(threaded, (c,))
-    
+        print_lock.release()
+      
     s.close()
-    
 
+if __name__ == '__main__':
+    Main()
+
+    
+"""
 class Player:
     def __init__(self, x, y, d, id):
-        """
-        init method for class
-        """
+        
         self.x = x  # player x coord
         self.y = y  # player y coord
         self.speed = 1  # player speed
@@ -55,9 +60,7 @@ class Player:
         self.boosts = 3
         
     def __move__(self):
-        """
-        method for moving the player
-        """
+      
         if not self.boost:  # player isn't currently boosting
             self.x += self.bearing[0]
             self.y += self.bearing[1]
@@ -66,9 +69,7 @@ class Player:
             self.y += self.bearing[1] * 2
 
     def __boost__(self):
-        """
-        starts the player boost
-        """
+      
         if self.boosts > 0:
             self.boosts -= 1
             self.boost = True
@@ -137,7 +138,7 @@ while not done:
         if time.time() - o.start_boost >= 0.5:  # limits boost to 0.5s
             o.boost = False
 
-        if (o.rect, '1') in path or (o.rect, '2') in path \
+        if (o.rect, '1') in path or (o.rect, '2') in path 
            or o.rect.collidelist(wall_rects) > -1:  # collided with path or wall
             # prevent player from hitting the path they just made
             if (time.time() - check_time) >= 0.1:
@@ -170,7 +171,4 @@ while not done:
     pygame.display.flip()  # flips display
     clock.tick(60)  # regulates FPS
 
-pygame.quit()	
-
-if __name__ == '__main__':
-    Main()
+pygame.quit()	"""
