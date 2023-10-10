@@ -77,10 +77,17 @@ class Fenetre:
 
 def run():
     c = Client()
-    for i in range(10):
-        send_to_server(c.client_socket, "hello stanos")
-    print("rayyy")
+    #for i in range(10):
+    #    send_to_server(c.client_socket, "hello stanos")
+    #print("rayyy")
+    i=0
     while True:
+        send_to_server(c.client_socket, "hello stanos")
+        data = c.client_socket.recv(1024)  # 1024 est la taille du tampon, ajustez-la en fonction de vos besoins
+        if not data:
+            break
+        print("Message reçu du serveur :", data.decode()) 
+        print(i+1) 
         print("")
 
     #wait "start" from server
@@ -89,7 +96,8 @@ def run():
     #    new_direction = get_new_direction()
     #    if new_direction != None:
     #        send_to_server(new_direction)
-#
+
+
 run()
 
     
