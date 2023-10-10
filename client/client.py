@@ -9,7 +9,7 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-host_ip = '172.21.72.136'
+host_ip = '0.0.0.0'
 port = 7778
 
 ###################
@@ -44,11 +44,11 @@ def get_new_direction():
 color_dict = {i: (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(1, 21)}
 
 class Fenetre:
-    def __init__(self, n=3, largeur=400, hauteur=400) -> None:
+    def __init__(self, n=3, largeur=300, hauteur=300) -> None:
         self.largeur = largeur
         self.hauteur = hauteur
         self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
-        self.matrice = np.zeros((40, 40), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
+        self.matrice = np.zeros((300, 300), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
 
     def render_matrix(self, player_data):
@@ -57,16 +57,21 @@ class Fenetre:
 
         # Mettre id des joueurs sur la matrice
         for player_id, (x, y, d) in player_data.items():
-            self.matrice[y][x] = player_id
             print(player_id)
             print(y+" , "+x)
+            self.matrice[int(y)][int(x)] = player_id
+            self.matrice[3][9] = 1
+            self.matrice[3][6] = 2
+            print(f"{player_id}  ->   {self.matrice[int(y)][int(x)]}")
+            
 
         # Boucle pour parcourir la matrice et dessiner les cellules
-        for i in range(len(self.matrice)):
-            for j in range(len(self.matrice[i])):
-                position = self.matrice[i][j]
+        for y in range(len(self.matrice)):
+            for x in range(len(self.matrice[y])):
+                position = self.matrice[y][x]
                 if position != 0:
-                    pygame.draw.rect(self.fenetre, color_dict[position], (j * 10, i * 10, 10, 10))
+                    pygame.draw.rect(self.fenetre, color_dict[position], (y*10 , x*10 , 10, 10))  #probleme sur le *10 ammene des hors cadres
+                    print(f" after draw : {y} et {x}")
         pygame.display.flip()
 
 #f = Fenetre()
