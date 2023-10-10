@@ -51,13 +51,15 @@ class Fenetre:
         self.matrice = np.zeros((40, 40), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
 
-    def render_matrix(self):
+    def render_matrix(self, player_data):
         # Remplir l'écran avec une couleur blanche
         self.fenetre.fill((255, 255, 255))
 
         # Mettre id des joueurs sur la matrice
-        for player_id, (x, y) in player_data.items():
+        for player_id, (x, y, d) in player_data.items():
             self.matrice[y][x] = player_id
+            print(player_id)
+            print(y+" , "+x)
 
         # Boucle pour parcourir la matrice et dessiner les cellules
         for i in range(len(self.matrice)):
@@ -76,6 +78,10 @@ class Fenetre:
 #    time.sleep(1)
 
 def decrypt_data(data):
+
+    data = data.split('!')
+    data = data[0]
+
     lines = data.split(';')
     positions = {}
 
@@ -90,6 +96,7 @@ def decrypt_data(data):
 
 def run():
     c = Client()
+    f = Fenetre()
     #for i in range(10):
     #    send_to_server(c.client_socket, "hello stanos")
     #print("rayyy")
@@ -102,11 +109,11 @@ def run():
         #print("Message reçu du serveur :", data.decode()) 
 
         player_data = decrypt_data(data.decode())
-        print(player_data[1])
-        
+        print(player_data)
+        f.render_matrix(player_data)
+
 
         
-
     #wait "start" from server
 
     #while True:
