@@ -13,11 +13,15 @@ host_ip = '172.21.72.136'
 port = 7778
 
 ###################
-
-def connect_to_server():
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((host_ip, port))
-    return True
+class Client:
+    def __init__(self) -> None:
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket.connect((host_ip, port))
+		
+#def connect_to_server():
+#    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#    client_socket.connect((host_ip, port))
+#    return True
 
 def send_to_server(client_socket: "socket", data: str):
     client_socket.send(str.encode(data))
@@ -63,14 +67,30 @@ class Fenetre:
                     pygame.draw.rect(self.fenetre, color_dict[position], (j * 10, i * 10, 10, 10))
         pygame.display.flip()
 
-f = Fenetre()
-while True:
-    # Supposer que vous recevez les nouvelles positions des joueurs du serveur sous forme de dictionnaire
-    player_data = {1: (random.randrange(0,40), random.randrange(0,40)), 2: (random.randrange(0,40), random.randrange(0+1,40-1))}  # Exemple de nouvelles données de joueurs
-    print(player_data)
-    f.render_matrix()
-    time.sleep(1)
+#f = Fenetre()
+#while True:
+#    # Supposer que vous recevez les nouvelles positions des joueurs du serveur sous forme de dictionnaire
+#    player_data = {1: (random.randrange(0,40), random.randrange(0,40)), 2: (random.randrange(0,40), random.randrange(0+1,40-1))}  # Exemple de nouvelles données de joueurs
+#    print(player_data)
+#    f.render_matrix()
+#   time.sleep(1)
 
+def run():
+    c = Client()
+    for i in range(10):
+        send_to_server(c.client_socket, "hello stanos")
+    print("rayyy")
+    while True:
+        print("")
+
+    #wait "start" from server
+
+    #while True:
+    #    new_direction = get_new_direction()
+    #    if new_direction != None:
+    #        send_to_server(new_direction)
+#
+run()
 
     
 
