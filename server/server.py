@@ -2,6 +2,17 @@ import socket
 from _thread import *
 import threading
 import time
+import numpy as np
+import time
+import json
+
+# Paramètres du jeu
+FPS = 25  # Fréquence de vérification (25 fois par seconde)
+
+# Temps entre chaque vérification
+delta_time = 1 / FPS
+
+
 
 print_lock = threading.Lock()
 connected_clients = []  # Une liste pour stocker les clients connectés
@@ -37,149 +48,114 @@ def Main():
 
     print("Clients connectés :", connected_clients)  # Afficher la liste des clients connectés
 
-
-    while True:
+    def Complet():
+        if len(connected_clients) == 3:
+            return False
+        return True
+    
+    i = True
+    while  i == True:
         c, addr = s.accept()
         print_lock.acquire()
         print('Connecté à :', addr[0], ':', addr[1])
         connected_clients.append(c)  # Ajoutez le client à la liste des clients connectés
         start_new_thread(threaded, (c,))
         print_lock.release()
+        i = Complet()
     
+    
+    print("sortie")
+    
+    #s.close()
 
-        
 
-
-
-       # s.close()
 
 if __name__ == '__main__':
     Main()
 
-    
-"""
+
 class Player:
-    def __init__(self, x, y, d, id):
-        
+    def __init__(self, x, y, d, id): 
         self.x = x  # player x coord
         self.y = y  # player y coord
-        self.speed = 1  # player speed
-        self.bearing = d  # player direction
-        self.colour = id
-        self.boost = False  # is boost active
-        self.start_boost = time.time()  # used to control boost length
-        self.boosts = 3
+        self.b = d  # player direction
+        self.id = id
+
+
+class Game:
+    def new_game():
+        global width, height
+        new_players = []
+        # Définissez le nombre de lignes et de colonnes en fonction du nombre de joueurs
+        num_players = len(connected_clients)
+        # Créez une matrice remplie de zéros pour représenter le plateau
+        width = 330*num_players
+        height = 300*num_players
+        plateau = np.zeros((width, height))
+        off = width// (num_players + 1)
+        for i in range(1, len(connected_clients) + 1):
+            for j in range(20,width-20 ,off):
+                new_players.append(Player(x=j, y=0, direction="h", id=i))
+
+        return plateau,new_players
+
+    # Assurez-vous que connected_clients et Player sont correctement définis dans votre code.
+    #offset = height - width #vertical space at top of window
+
+
+    check_time = time.time()  # used to check collisions with rects
+
+    def broadcast_game_state(self):
+        game_state = {
+            "matrix": self.plateau.tolist(),
+            "players": [
+                {"id": player.id, "x": player.x, "y": player.y, "d": player.d}
+                for player in self.players
+            ],
+        }
+        game_state_json = json.dumps(game_state)
+
+        for client in connected_clients:
+            try:
+                client.send(game_state_json.encode("utf-8"))
+            except Exception as e:
+                print(e)
+                connected_clients.remove(client)
+
+    def  deplacement(plateau, x, y, d, id):
+
+        if d == "h":
+            new_x, new_y = x, y - 1
+        elif d == "b":
+            new_x, new_y = x, y + 1
+        elif d == "g":
+            new_x, new_y = x - 1, y
+        elif d == "d":
+            new_x, new_y = x + 1, y
+
+        if new_x < 0 or new_x >= width or new_y < 0 or new_y >= height:
+            return True  # Collision avec les bords du plateau
+
+        # Vérifie si le joueur entre en collision avec d'autres joueurs ou des obstacle
+        if (new_x,new_y) != 0:
+            return True 
         
-    def __move__(self):
-      
-        if not self.boost:  # player isn't currently boosting
-            self.x += self.bearing[0]
-            self.y += self.bearing[1]
-        else:
-            self.x += self.bearing[0] * 2
-            self.y += self.bearing[1] * 2
+        plateau[y][x] = id
+        plateau[new_y][new_x] = id
+        
+        x, y = new_x, new_y
 
-    def __boost__(self):
-      
-        if self.boosts > 0:
-            self.boosts -= 1
-            self.boost = True
-            self.start_boost = time.time()
+        return False  
 
+    def Jeu(plateau,player ):
+        while True:
+            # Heure de départ de la boucle
+            start_time = time.time()
+            #ici chatgpt faire les verif etc stp
+            # Heure de fin de la boucle
+            end_time = time.time()
 
-def new_game():
-    # Instanciez un nouveau joueur pour chaque client connecté
-    new_players = []
-    idd =0
-    for c in connected_clients:
-                new_players.append(Player(width/len(new_players), 0, "h", idd))
-                idd+=1
-                
-    width, height = 300*len(new_players), 330*len(new_players)  # window dimensions
-	
-
-    return new_players,width,height
-
-offset = height - width #vertical space at top of window
-
-
-check_time = time.time()  # used to check collisions with rects
-
-
-wall_rects = [pygame.Rect([0, offset, 15, height]) , pygame.Rect([0, offset, width, 15]),\
-              pygame.Rect([width - 15, offset, 15, height]),\
-              pygame.Rect([0, height - 15, width, 15])]  # outer walls of window
-
-done = False
-new = False
-
-while not done:
-    for event in pygame.event.get():  # gets all event in last tick
-        if event.type == pygame.QUIT:  # close button pressed
-            done = True
-        elif event.type == pygame.KEYDOWN:  # keyboard key pressed
-            # === Player 1 === #
-            if event.key == pygame.K_w:
-                objects[0].bearing = (0, -2)
-            elif event.key == pygame.K_s:
-                objects[0].bearing = (0, 2)
-            elif event.key == pygame.K_a:
-                objects[0].bearing = (-2, 0)
-            elif event.key == pygame.K_d:
-                objects[0].bearing = (2, 0)
-            elif event.key == pygame.K_TAB:
-                objects[0].__boost__()
-            # === Player 2 === #
-            if event.key == pygame.K_UP:
-                objects[1].bearing = (0, -2)
-            elif event.key == pygame.K_DOWN:
-                objects[1].bearing = (0, 2)
-            elif event.key == pygame.K_LEFT:
-                objects[1].bearing = (-2, 0)
-            elif event.key == pygame.K_RIGHT:
-                objects[1].bearing = (2, 0)
-            elif event.key == pygame.K_RSHIFT:
-                objects[1].__boost__()
-
-    screen.fill(BLACK)  # clears the screen
-
-    for r in wall_rects: pygame.draw.rect(screen, (42, 42, 42), r, 0)  # draws the walls
-
-    for o in objects:
-        if time.time() - o.start_boost >= 0.5:  # limits boost to 0.5s
-            o.boost = False
-
-        if (o.rect, '1') in path or (o.rect, '2') in path 
-           or o.rect.collidelist(wall_rects) > -1:  # collided with path or wall
-            # prevent player from hitting the path they just made
-            if (time.time() - check_time) >= 0.1:
-                check_time = time.time()
-
-                if o.colour == P1_COLOUR:
-                    player_score[1] += 1
-                else: player_score[0] += 1
-
-                new = True
-                new_p1, new_p2 = new_game()
-                objects = [new_p1, new_p2]
-                path = [(p1.rect, '1'), (p2.rect, '2')]
-                break
-        else:  # not yet traversed
-            path.append((o.rect, '1')) if o.colour == P1_COLOUR else path.append((o.rect, '2'))
-
-        o.__draw__()
-        o.__move__()
-
-    for r in path:
-        if new is True:
-            path = []
-            new = False
-            break
-        if r[1] == '1': pygame.draw.rect(screen, P1_COLOUR, r[0], 0)
-        else: pygame.draw.rect(screen, P2_COLOUR, r[0], 0)
-
-    
-    pygame.display.flip()  # flips display
-    clock.tick(60)  # regulates FPS
-
-pygame.quit()	"""
+            # Calcul du temps d'attente pour atteindre la fréquence souhaitée
+            elapsed_time = end_time - start_time
+            sleep_time = max(0, delta_time - elapsed_time)
+            time.sleep(sleep_time)
