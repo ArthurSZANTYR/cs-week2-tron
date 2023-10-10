@@ -6,7 +6,7 @@ import pygame
 
 #'stan ip' : 172.21.72.136
 host_ip = '172.21.72.136'
-port = 7777
+port = 7778
 
 ###################
 
@@ -14,7 +14,7 @@ class Player():
     
 	def __init__(self,id, x, y, direction, color=(255,0,0)) -> None:
 
-		self.id = id
+		#self.id = id
 
 		self.x = x
 		self.y = y
@@ -23,10 +23,14 @@ class Player():
 		self.socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		
 		self.socket.connect((host_ip, port))
-		self.socket.recv(2048).decode() #reste ne écoute sur le serveur sinon deco direct
+		print("c'est moiu")
+		#self.socket.recv(2048).decode() #reste ne écoute sur le serveur sinon deco direct
+		print("je suis ici")
 
 	def send_to_server(self, data):
+		print("la")
 		self.socket.send(str.encode(data))
+		print("amdoulad")
 
 	def move(self): #return new direction
 		keys = pygame.key.get_pressed()
@@ -48,10 +52,24 @@ class Player():
 			self.y -=1
 
 	def data_network_format(self):
-		return f"{self.x},{self.y},{self.direction},{self.id}"
+		return f"{self.x},{self.y},{self.direction},{self.socket.getsockname()[1]}"
 	
 p1 = Player(1,0,2,"R")
+
+
+
+while true:
+
 p1.send_to_server(p1.data_network_format())
+p1.send_to_server(p1.data_network_format())
+p1.send_to_server(p1.data_network_format())
+
+#while True:
+#	p1.send_to_server("mama")
+#p1.send_to_server(p1.data_network_format())
+#p1.send_to_server(p1.data_network_format())
+#p1.send_to_server(p1.data_network_format())
+
 
 		
 
