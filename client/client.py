@@ -66,12 +66,14 @@ def get_new_direction() -> str:
 
 class Fenetre:
     def __init__(self, n=3, largeur_fenetre=30, hauteur_fenetre=30) -> None:
-        self.largeur = largeur_fenetre
-        self.hauteur = hauteur_fenetre
+        self.facteur_grossisment_pygame = 10
+
+        self.largeur = largeur_fenetre*self.facteur_grossisment_pygame
+        self.hauteur = hauteur_fenetre*self.facteur_grossisment_pygame
         self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
         self.matrice = np.zeros((30, 30), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
-
+        
     def render_matrix(self, player_data: dict, color_dict: dict) -> None:
         """
     Fonction permettant de mettre a jour la matrice courante du jeu et la fenetre pygame
@@ -88,22 +90,23 @@ class Fenetre:
 
         # Update de la matrice courante du jeu
         for player_id, (x, y, d) in player_data.items():
-            self.matrice[int(x)][int(y)] = player_id
+            self.matrice[int(y)][int(x)] = player_id
+
             
         # Boucle pour parcourir la matrice et dessiner les cellules
         for y in range(len(self.matrice)):
             for x in range(len(self.matrice[y])):
-                position = self.matrice[x][y]
+                position = self.matrice[y][x]
                 if position != 0:
-                    facteur_grossisment = 1
-                    pygame.draw.rect(self.fenetre, color_dict[position], (x*facteur_grossisment , y*facteur_grossisment , facteur_grossisment, facteur_grossisment))  #probleme sur le facteur *10 ammene des hors cadres
+                    
+                    pygame.draw.rect(self.fenetre, color_dict[position], (y*self.facteur_grossisment_pygame , x*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))  #probleme sur le facteur *10 ammene des hors cadres
         pygame.display.flip()
 
 def decrypt_data(data_brut: str)-> dict:
     """
     Fonction permettant de convertir le paquet recu par le serveur en dictionnaire
 
-    Args:
+    Args:F
         data: str -> data recu par le serveur sous forme de string
 
     Returns:
