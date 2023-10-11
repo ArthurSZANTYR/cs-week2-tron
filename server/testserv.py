@@ -146,7 +146,7 @@ def threaded(c, game : Game):
 
             # Supposons que les données reçues ont la forme "socket_id, direction"
             parts = data.split(",")
-            if len(parts) == 2:
+            if len(parts) == 1:
                 socket_id, new_direction = parts  # Séparez les deux parties
                 print(socket_id+new_direction)
                 

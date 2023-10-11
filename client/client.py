@@ -9,8 +9,8 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-host_ip = '0.0.0.0'
-port = 7778
+host_ip = '172.21.72.136'
+port = 7777
 
 ###################
 class Client:
