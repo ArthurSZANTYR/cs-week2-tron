@@ -7,7 +7,7 @@ import json
 
 # Paramètres du jeu
 
-FPS = 3 # Fréquence de vérification (25 fois par seconde)
+FPS = 1 # Fréquence de vérification (25 fois par seconde)
 
 # Temps entre chaque vérification
 delta_time = 1 / FPS
@@ -52,8 +52,6 @@ class Game:
 
 
 
-
-
     def new_game(self):
         # Définissez le nombre de lignes et de colonnes en fonction du nombre de joueurs
         num_players = len(connected_clients)
@@ -67,7 +65,7 @@ class Game:
         # Obtenez le nom du socket pour utiliser comme ID du joueur
             #player_id = c.getpeername()
             client_ip, client_port = c.getpeername()
-            self.players.append(Player(x=x, y=0, d="U", id=client_port))
+            self.players.append(Player(x=x, y=0, d="D", id=client_port))
             print(c.getpeername())
             print(client_port)
 
@@ -86,15 +84,19 @@ class Game:
         elif d == "R":
             new_x = x + 1
     
-        if new_x < 0 or new_x >= self.width or new_y < 0 or new_y >= self.height:
+        if new_x <0 or new_x >= self.width or new_y <0 or new_y >= self.height:
+           # print("colosion bord")
             return True  # Collision avec les bords du plateau
     
         # Vérifiez si le joueur entre en collision avec d'autres joueurs ou des obstacles
         if self.plateau[new_y][new_x] != 0:
+            #print("colosion pas 0 bb")
             return True  # Collision avec un autre joueur ou un obstacle
-    
+
+        print(self.plateau)
+        print("caca")
         # Mettez à jour les positions sur le plateau
-        self.plateau[y][x] = 0  # Ancienne position
+        #self.plateau[y][x] = 0  # Ancienne position
         self.plateau[new_y][new_x] = id  # Nouvelle position
     
         player.x, player.y = new_x, new_y  # Mettez à jour les coordonnées du joueur
@@ -103,22 +105,24 @@ class Game:
 
 
 
-
+    
     def Jeu(self):
-        while True:
+        stop = True
+        while stop == True:
             # Heure de départ de la boucle
             start_time = time.time()
            # print("dans le jeu")
             # Votre logique de jeu ici
             for player in self.players:
-                self.deplacement(player)
-               # print("eplacement ?")
-               # if not self.deplacement(player):
-               #     # Le joueur n'a pas rencontré de collision, continuez le mouvement
-               #     pass
-               # else:
-               #     # Collision, le joueur est éliminé ou doit être géré
-               #     pass
+                #self.deplacement(player)
+                if not self.deplacement(player):
+                    # Le joueur n'a pas rencontré de collision, continuez le mouvement
+                    pass
+                else:
+                   # print("COLISIONNNNNNN !!!)")
+                    #stop = False
+                    pass
+                    
 
             # Appelez send_game_state_to_clients pour envoyer les nouvelles positions des joueurs
             self.send_game_state_to_clients()
@@ -130,6 +134,7 @@ class Game:
             elapsed_time = end_time - start_time
             sleep_time = max(0, delta_time - elapsed_time)
             time.sleep(sleep_time)
+        print("C'est fini petpito")
 
 
 socket_to_player_id = {}
