@@ -65,7 +65,7 @@ def get_new_direction() -> str:
 #color_dict = {i: (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(1, 21)}
 
 class Fenetre:
-    def __init__(self, n=3, largeur_fenetre=300, hauteur_fenetre=300) -> None:
+    def __init__(self, n=3, largeur_fenetre=30, hauteur_fenetre=30) -> None:
         self.largeur = largeur_fenetre
         self.hauteur = hauteur_fenetre
         self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
@@ -95,7 +95,8 @@ class Fenetre:
             for x in range(len(self.matrice[y])):
                 position = self.matrice[x][y]
                 if position != 0:
-                    pygame.draw.rect(self.fenetre, color_dict[position], (x*10 , y*10 , 10, 10))  #probleme sur le facteur *10 ammene des hors cadres
+                    facteur_grossisment = 1
+                    pygame.draw.rect(self.fenetre, color_dict[position], (x*facteur_grossisment , y*facteur_grossisment , facteur_grossisment, facteur_grossisment))  #probleme sur le facteur *10 ammene des hors cadres
         pygame.display.flip()
 
 def decrypt_data(data_brut: str)-> dict:
