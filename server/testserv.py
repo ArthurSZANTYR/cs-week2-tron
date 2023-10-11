@@ -20,6 +20,9 @@ class Player:
         self.y = y  # player y coord
         self.d = d  # player direction
         self.id = id
+    
+    def update_direction(self, new_direction):
+        self.d = new_direction
 
 class Game:
     def __init__(self):
@@ -29,16 +32,17 @@ class Game:
         self.plateau = []
 
     def send_game_state_to_clients(self):
-        players_data = {
-            player.id: (player.x, player.y, player.d)
-            for player in self.players
-        }
-
-        players_data_json = json.dumps(players_data)  # Convertir en JSON
-
+        all_players_data = []
+    
+        for player in self.players:
+            player_data = f"{player.id},{player.x},{player.y},{player.d}"
+            all_players_data.append(player_data)
+    
+        players_data = ";".join(all_players_data)  # Joindre les données de tous les joueurs avec des points-virgules
+    
         for client in connected_clients:
             try:
-                client.send(players_data_json.encode("utf-8"))
+                client.send((players_data + "!").encode("utf-8"))
             except Exception as e:
                 print(e)
                 connected_clients.remove(client)
@@ -53,27 +57,18 @@ class Game:
         # Définissez le nombre de lignes et de colonnes en fonction du nombre de joueurs
         num_players = len(connected_clients)
         # Créez une matrice remplie de zéros pour représenter le plateau
-        self.width = 330 * num_players
-        self.height = 300 * num_players
+        self.width = 30 * num_players
+        self.height = 30 * num_players
         self.plateau = np.zeros((self.width, self.height))
         off = self.width // (num_players + 1)
         for i, c in enumerate(connected_clients):
-            x = 20 + i * off  # Répartissez les joueurs équitablement
-            self.players.append(Player(x=x, y=0, d="h", id=i + 1))
-
-    def send_game_state_to_clients(self):
-        players_data = ";".join(
-            f"{player.id},{player.x},{player.y},{player.d}"
-            for player in self.players
-        )
-        players_data += "!"
-
-        for client in connected_clients:
-            try:
-                client.send(players_data.encode("utf-8"))
-            except Exception as e:
-                print(e)
-                connected_clients.remove(client)
+            x = 1 + i * off  # Répartissez les joueurs équitablement
+        # Obtenez le nom du socket pour utiliser comme ID du joueur
+            #player_id = c.getpeername()
+            client_ip, client_port = c.getpeername()
+            self.players.append(Player(x=x, y=0, d="h", id=client_port))
+            print(c.getpeername())
+            print(client_port)
 
 
 
@@ -105,11 +100,11 @@ class Game:
 
 
 
-
     def Jeu(self):
         while True:
             # Heure de départ de la boucle
             start_time = time.time()
+
             # Votre logique de jeu ici
             for player in self.players:
                 if not self.deplacement(player):
@@ -118,8 +113,10 @@ class Game:
                 else:
                     # Collision, le joueur est éliminé ou doit être géré
                     pass
-            # Envoi des informations du jeu à tous les clients
+
+            # Appelez send_game_state_to_clients pour envoyer les nouvelles positions des joueurs
             self.send_game_state_to_clients()
+
             # Heure de fin de la boucle
             end_time = time.time()
 
@@ -129,23 +126,37 @@ class Game:
             time.sleep(sleep_time)
 
 
+socket_to_player_id = {}
 
-def threaded(c):
-    global connected_clients  # Utilisez la liste globale des clients connectés
+def threaded(c, game):
+    global connected_clients, socket_to_player_id
 
-    try: 
+    try:
+        client_name = c.getpeername()
+        client_id = socket_to_player_id.get(client_name, None)
+
         while True:
-            data = c.recv(1024)
-            if len(data) == 0: 
-                print("client disconnected")
+            data = c.recv(1024).decode("utf-8")
+            if len(data) == 0:
+                print(f"Client {client_name} disconnected")
                 connected_clients.remove(c)
                 break
 
-            print(data.decode())            
+            # Supposons que les données reçues ont la forme "socket_id, direction"
+            parts = data.split(",")
+            if len(parts) == 2:
+                socket_id, new_direction = parts  # Séparez les deux parties
+
+                # Recherchez le joueur correspondant à l'ID du socket
+                for player in game.players:
+                    if player.id == int(socket_id):
+                        player.update_direction(new_direction)
+                        break
 
     except ConnectionResetError:
-        print("client disconnected")
+        print(f"Client {client_name} disconnected")
         connected_clients.remove(c)
+
 
 def Main():
     host = "172.21.72.136"
@@ -163,21 +174,30 @@ def Main():
     game = Game()
 
     def Complet():
-        if len(connected_clients) == 1:
+        if len(connected_clients) == 2:
             return False
         return True
     
+
     i = True
-    while i == True:
+    while i:
         c, addr = s.accept()
         print_lock.acquire()
-        print('Connecté à :', addr[0], ':', addr[1])
-        connected_clients.append(c)  # Ajoutez le client à la liste des clients connectés
-        start_new_thread(threaded, (c,))
+        print('Connected to:', addr[0], ':', addr[1])
+        connected_clients.append(c)
+
+        # Utilisez l'adresse du socket comme ID unique
+        player_id = addr[1]  # Utilisez l'adresse du socket comme ID unique
+
+        game.players.append(Player(x=0, y=0, d="h", id=player_id))
+        socket_to_player_id[c.getpeername()] = player_id
+
+        # Pass the 'game' instance to the 'threaded' function
+        start_new_thread(threaded, (c, game))
         print_lock.release()
         i = Complet()
 
-    print("sortie")
+    print("Exit")
 
     # Créez un nouveau jeu lorsque tous les clients sont connectés
     game.new_game()
