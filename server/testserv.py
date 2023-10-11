@@ -58,8 +58,8 @@ class Game:
         # Définissez le nombre de lignes et de colonnes en fonction du nombre de joueurs
         num_players = len(connected_clients)
         # Créez une matrice remplie de zéros pour représenter le plateau
-        self.width = 30 * num_players
-        self.height = 30 * num_players
+        self.width = 30 #* num_players
+        self.height = 30 #* num_players
         self.plateau = np.zeros((self.width, self.height))
         off = self.width // (num_players + 1)
         for i, c in enumerate(connected_clients):
