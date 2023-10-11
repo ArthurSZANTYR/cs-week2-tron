@@ -9,8 +9,10 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-host_ip = '172.21.72.136'
-port = 7777
+host_ip = ''
+port = 7778
+nombre_joueur = 2 #pour la taille matrice
+client_socket_winner = 1234787  #envoi du gagnant par le server a la fin de la partie
 
 ###################
 class Client:
@@ -65,13 +67,13 @@ def get_new_direction() -> str:
 #color_dict = {i: (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(1, 21)}
 
 class Fenetre:
-    def __init__(self, n=3, largeur_fenetre=30, hauteur_fenetre=30) -> None:
+    def __init__(self, n=3, largeur_fenetre=15, hauteur_fenetre=15) -> None:
         self.facteur_grossisment_pygame = 10
 
-        self.largeur = largeur_fenetre*self.facteur_grossisment_pygame
-        self.hauteur = hauteur_fenetre*self.facteur_grossisment_pygame
+        self.largeur = largeur_fenetre*nombre_joueur*self.facteur_grossisment_pygame
+        self.hauteur = hauteur_fenetre*nombre_joueur*self.facteur_grossisment_pygame
         self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
-        self.matrice = np.zeros((30, 30), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
+        self.matrice = np.zeros((15*nombre_joueur, 15*nombre_joueur), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
         
     def render_matrix(self, player_data: dict, color_dict: dict) -> None:
@@ -101,6 +103,14 @@ class Fenetre:
                     
                     pygame.draw.rect(self.fenetre, color_dict[position], (x*self.facteur_grossisment_pygame , y*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))  #probleme sur le facteur *10 ammene des hors cadres
         pygame.display.flip()
+
+    def render_endgame(self, client_socket_winner: int, client: Client):
+        if client_socket_winner == client.client_port:
+            #faire ecran gagnant
+            pass
+        else:
+            #faire ecran perdant
+            pass
 
 def decrypt_data(data_brut: str)-> dict:
     """
