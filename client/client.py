@@ -9,7 +9,7 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-host_ip = '172.21.72.136'
+host_ip = '0.0.0.0'
 port = 7778
 
 ###################
@@ -90,16 +90,16 @@ class Fenetre:
 
         # Update de la matrice courante du jeu
         for player_id, (x, y, d) in player_data.items():
-            self.matrice[int(y)][int(x)] = player_id
+            self.matrice[int(x)][int(y)] = player_id
 
             
         # Boucle pour parcourir la matrice et dessiner les cellules
         for y in range(len(self.matrice)):
             for x in range(len(self.matrice[y])):
-                position = self.matrice[y][x]
+                position = self.matrice[x][y]
                 if position != 0:
                     
-                    pygame.draw.rect(self.fenetre, color_dict[position], (y*self.facteur_grossisment_pygame , x*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))  #probleme sur le facteur *10 ammene des hors cadres
+                    pygame.draw.rect(self.fenetre, color_dict[position], (x*self.facteur_grossisment_pygame , y*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))  #probleme sur le facteur *10 ammene des hors cadres
         pygame.display.flip()
 
 def decrypt_data(data_brut: str)-> dict:
