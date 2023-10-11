@@ -43,7 +43,7 @@ def get_new_direction():
     return None
 
 # Créez un dictionnaire associant des nombres de 1 à 20 à des couleurs aléatoires
-color_dict = {i: (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(1, 21)}
+#color_dict = {i: (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(1, 21)}
 
 class Fenetre:
     def __init__(self, n=3, largeur_fenetre=300, hauteur_fenetre=300) -> None:
@@ -53,7 +53,7 @@ class Fenetre:
         self.matrice = np.zeros((30, 30), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
 
-    def render_matrix(self, player_data):
+    def render_matrix(self, player_data, color_dict):
         # Remplir l'écran avec une couleur blanche
         self.fenetre.fill((255, 255, 255))
 
@@ -74,7 +74,7 @@ class Fenetre:
                 if position != 0:
                     print(f"position : {position}")
                     #pygame.draw.rect(self.fenetre, color_dict[position], (y*10 , x*10 , 10, 10))  #probleme sur le *10 ammene des hors cadres
-                    pygame.draw.rect(self.fenetre, color_dict[1], (y*10 , x*10 , 10, 10))  #probleme sur le *10 ammene des hors cadres
+                    pygame.draw.rect(self.fenetre, color_dict[position], (y*10 , x*10 , 10, 10))  #probleme sur le *10 ammene des hors cadres
                     print(f" after draw : {y} et {x}")
         pygame.display.flip()
 
@@ -102,6 +102,12 @@ def decrypt_data(data):
 
     return positions
 
+def generate_colors(player_data):
+    color_dict = {}
+    for player_id, (x, y, d) in player_data.items():
+        color_dict[player_id] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    return color_dict 
+
 
 def run():
     c = Client()
@@ -118,8 +124,13 @@ def run():
         #print("Message reçu du serveur :", data.decode()) 
 
         player_data = decrypt_data(data.decode())
+
+        if i == 0:
+          color_dict = generate_colors(player_data)
+          i+=1
+
         print(player_data)
-        f.render_matrix(player_data)
+        f.render_matrix(player_data, color_dict)
 
         new_d = get_new_direction()
         if new_d != None:
