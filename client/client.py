@@ -9,7 +9,7 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-host_ip = '0.0.0.0'
+host_ip = '172.21.72.136'
 port = 7778
 
 ###################
@@ -17,6 +17,8 @@ class Client:
     def __init__(self) -> None:
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((host_ip, port))
+
+        self.client_ip, self.client_port = self.client_socket.getsockname()
 		
 #def connect_to_server():
 #    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,11 +46,11 @@ def get_new_direction():
 color_dict = {i: (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(1, 21)}
 
 class Fenetre:
-    def __init__(self, n=3, largeur=300, hauteur=300) -> None:
-        self.largeur = largeur
-        self.hauteur = hauteur
+    def __init__(self, n=3, largeur_fenetre=300, hauteur_fenetre=300) -> None:
+        self.largeur = largeur_fenetre
+        self.hauteur = hauteur_fenetre
         self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
-        self.matrice = np.zeros((300, 300), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
+        self.matrice = np.zeros((30, 30), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
 
     def render_matrix(self, player_data):
@@ -60,8 +62,8 @@ class Fenetre:
             print(player_id)
             print(y+" , "+x)
             self.matrice[int(y)][int(x)] = player_id
-            self.matrice[3][9] = 1
-            self.matrice[3][6] = 2
+            #self.matrice[3][9] = 1
+            #self.matrice[3][6] = 2
             print(f"{player_id}  ->   {self.matrice[int(y)][int(x)]}")
             
 
@@ -70,7 +72,9 @@ class Fenetre:
             for x in range(len(self.matrice[y])):
                 position = self.matrice[y][x]
                 if position != 0:
-                    pygame.draw.rect(self.fenetre, color_dict[position], (y*10 , x*10 , 10, 10))  #probleme sur le *10 ammene des hors cadres
+                    print(f"position : {position}")
+                    #pygame.draw.rect(self.fenetre, color_dict[position], (y*10 , x*10 , 10, 10))  #probleme sur le *10 ammene des hors cadres
+                    pygame.draw.rect(self.fenetre, color_dict[1], (y*10 , x*10 , 10, 10))  #probleme sur le *10 ammene des hors cadres
                     print(f" after draw : {y} et {x}")
         pygame.display.flip()
 
@@ -116,6 +120,10 @@ def run():
         player_data = decrypt_data(data.decode())
         print(player_data)
         f.render_matrix(player_data)
+
+        new_d = get_new_direction()
+        if new_d != None:
+            send_to_server(c.client_socket, f"{c.client_port},{new_d}")
 
 
         
