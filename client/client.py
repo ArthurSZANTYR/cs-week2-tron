@@ -88,14 +88,14 @@ class Fenetre:
 
         # Update de la matrice courante du jeu
         for player_id, (x, y, d) in player_data.items():
-            self.matrice[int(y)][int(x)] = player_id
+            self.matrice[int(x)][int(y)] = player_id
             
         # Boucle pour parcourir la matrice et dessiner les cellules
         for y in range(len(self.matrice)):
             for x in range(len(self.matrice[y])):
-                position = self.matrice[y][x]
+                position = self.matrice[x][y]
                 if position != 0:
-                    pygame.draw.rect(self.fenetre, color_dict[position], (y*5 , x*5 , 5, 5))  #probleme sur le facteur *10 ammene des hors cadres
+                    pygame.draw.rect(self.fenetre, color_dict[position], (x*10 , y*10 , 10, 10))  #probleme sur le facteur *10 ammene des hors cadres
         pygame.display.flip()
 
 def decrypt_data(data_brut: str)-> dict:
