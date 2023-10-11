@@ -59,15 +59,7 @@ class Game:
         self.width = 30 #* num_players
         self.height = 30 #* num_players
         self.plateau = np.zeros((self.width, self.height))
-        off = self.width // (num_players + 1)
-        for i, c in enumerate(connected_clients):
-            x = 1 + i * off  # Répartissez les joueurs équitablement
-        # Obtenez le nom du socket pour utiliser comme ID du joueur
-            #player_id = c.getpeername()
-            client_ip, client_port = c.getpeername()
-            self.players.append(Player(x=x, y=0, d="D", id=client_port))
-            print(c.getpeername())
-            print(client_port)
+        
 
 
 
@@ -93,8 +85,7 @@ class Game:
             #print("colosion pas 0 bb")
             return True  # Collision avec un autre joueur ou un obstacle
 
-        print(self.plateau)
-        print("caca")
+        
         # Mettez à jour les positions sur le plateau
         #self.plateau[y][x] = 0  # Ancienne position
         self.plateau[new_y][new_x] = id  # Nouvelle position
@@ -119,7 +110,7 @@ class Game:
                     # Le joueur n'a pas rencontré de collision, continuez le mouvement
                     pass
                 else:
-                   # print("COLISIONNNNNNN !!!)")
+                    print("COLISIONNNNNNN !!!)")
                     #stop = False
                     pass
                     
@@ -174,7 +165,7 @@ def threaded(c, game : Game):
 
 
 def Main():
-    host = "0.0.0.0"
+    host = ""
     port = 7778
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -201,11 +192,30 @@ def Main():
         print('Connected to:', addr[0], ':', addr[1])
         connected_clients.append(c)
 
-        # Utilisez l'adresse du socket comme ID unique
-        player_id = addr[1]  # Utilisez l'adresse du socket comme ID unique
 
-        game.players.append(Player(x=0, y=0, d="h", id=player_id))
-        socket_to_player_id[c.getpeername()] = player_id
+
+        #off = self.width // (num_players + 1)
+        #for i, c in enumerate(connected_clients):
+        #    x = 1 + i * off  # Répartissez les joueurs équitablement
+        ## Obtenez le nom du socket pour utiliser comme ID du joueur
+        #    #player_id = c.getpeername()
+        #    client_ip, client_port = c.getpeername()
+        #    self.players.append(Player(x=x, y=0, d="D", id=client_port))
+        #    print(c.getpeername())
+        #    print(client_port)
+
+        
+        # Utilisez l'adresse du socket comme ID unique
+        for i, c in enumerate(connected_clients):
+            player_id = addr[1]  # Utilisez l'adresse du socket comme ID unique
+            socket_to_player_id[c.getpeername()] = player_id
+            k = 1 + i*10
+
+# Incrémente le compteur de 10 pour chaque nouvel ajout.
+            game.players.append(Player(x=k, y=0, d="D", id=player_id))
+            print(k)
+        
+        
 
         # Pass the 'game' instance to the 'threaded' function
         start_new_thread(threaded, (c, game))
