@@ -159,7 +159,7 @@ def threaded(c, game):
 
 
 def Main():
-    host = "172.21.72.136"
+    host = "0.0.0.0"
     port = 7778
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
