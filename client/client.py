@@ -81,7 +81,7 @@ class Fenetre:
         self.matrice[-1, :] = -1  # Remplit la dernière ligne avec -1
         self.matrice[:, 0] = -1  # Remplit la première colonne avec -1
         self.matrice[:, -1] = -1  # Remplit la dernière colonne avec -1
-        print(self.matrice)
+        
         
     def render_matrix(self, player_data: dict, color_dict: dict) -> None:
         """
@@ -111,6 +111,10 @@ class Fenetre:
 
                 if position > 0:
                     pygame.draw.rect(self.fenetre, color_dict[position], (x*self.facteur_grossisment_pygame , y*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))  #probleme sur le facteur *10 ammene des hors cadres
+        pygame.display.flip()
+
+    def render_intro(self, color_dict: dict, c: "Client")-> None:
+        self.fenetre.fill(color_dict[c.client_port])
         pygame.display.flip()
 
     def render_endgame(self, client_socket_winner: int, client: Client):
@@ -146,6 +150,27 @@ def decrypt_data(data_brut: str)-> dict:
 
     return positions
 
+def decrypt_end_data(data_brut: bytes) -> list:
+    # Décoder les données brutes en une chaîne de caractères (str)
+    data_str = data_brut.decode('utf-8')
+
+    # Enlevez le premier caractère (par exemple, "?")
+    data_str = data_str[1:]
+
+    # Divisez la chaîne en fonction de '!' pour obtenir la liste
+    data = data_str.split('!')[0]
+
+    # Divisez la liste obtenue en fonction de ',' pour obtenir les éléments individuels
+    classement = data.split(',')
+    
+    # Convertissez les éléments en entiers si nécessaire
+    classement = [int(item) for item in classement]
+
+    return classement
+
+
+
+
 def generate_colors(player_data: dict)-> dict:
     """
     Fonction permettant de generer un dictionaire qui attribue une couleur aléatoire a chaque player
@@ -162,9 +187,9 @@ def generate_colors(player_data: dict)-> dict:
         color_dict[player_id] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
     return color_dict 
 
-def end_game(player_data: dict) -> bool:
-    # Vérifie si toutes les valeurs dans le dictionnaire sont égales à -1
-    return all(key == -1 for key in player_data.keys())
+def end_game(data_brut: str) -> bool:
+    # Vérifie si data_brut commence par un certain caractère (par exemple, "?")
+    return data_brut.startswith("?")
 
 
 def run()-> None:
@@ -186,23 +211,33 @@ def run()-> None:
 
     f = Fenetre(int(nombre_joueur))
 
-    i=0 #pour identifier le premier tour de jeu
+    #1er message server et attribution des couleurs
+    while True:
+        data = c.client_socket.recv(1024) 
+        player_data = decrypt_data(data.decode())
+        color_dict = generate_colors(player_data)
+        print(f"premiere donnée {player_data}")
+        if data:
+            break
+
+    f.render_intro(color_dict, c)
 
     #boucle de jeu
     while True:
-        data = c.client_socket.recv(1024)  # 1024 est la taille max du message
-        if not data:
+        data_brut = c.client_socket.recv(1024)  # 1024 est la taille max du message
+        data = data_brut.decode() 
+        print(f"ici datatatata : {data}")
+        if end_game(data):  #pour le dernier tour de jeu - le serveur femre donc plus de data - je sort de la boucle
+            print("endddddddddddddd")
             break
+        print("herre")
+        
+        
+        player_data = decrypt_data(data) #pour le dernier tour de jeu - le dernier message du serveur sera le classement que je garde en mémoire
 
-        player_data = decrypt_data(data.decode())
-
-        if i == 0:  #au premier tour de jeu - generation du dictionnaire de couleur
-          color_dict = generate_colors(player_data)
-          i+=1
-
-        if end_game(player_data):
-            print("this is the end ")
-            break
+        #if end_game(player_data):
+        #   print("this is the end ")
+        #    break
 
         print(player_data)
         f.render_matrix(player_data, color_dict)
@@ -210,6 +245,13 @@ def run()-> None:
         new_d = get_new_direction()   #verifie les evenements clavier si pas de retour pas d'envoi au serveur
         if new_d != None:   
             send_to_server(c.client_socket, f"{c.client_port},{new_d}")
+
+    
+    print("fin de jeu")
+    end_data = decrypt_end_data(data_brut)
+    print(end_data)
+    #f.render_endgame(end_data)
+    time.sleep(10) #temp d'affichage du window de result
 
 run()
 
