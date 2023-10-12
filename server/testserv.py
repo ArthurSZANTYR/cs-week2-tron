@@ -102,21 +102,58 @@ class Game:
         return False
 
 
+    def TousMort(self, player):
+        liste = []
+        for player in self.players:
+            x, y, d, id = player.x, player.y, player.d, player.id
+            liste.append(player.id)
+
+        print(liste)
+
+        bla = False
+
+        if all(ele == -1 for ele in liste):
+            tableau = self.plateau
+            occurrences = {}
+
+            for ligne in tableau:
+                for valeur in ligne:
+                    if valeur not in [0, -1]:
+                        occurrences[valeur] = occurrences.get(valeur, 0) + 1
+
+            # Trier le dictionnaire par ID dans l'ordre croissant
+            classement = sorted(occurrences.items(), key=lambda x: x[0])
+
+            for client in connected_clients:
+                # Créer une liste des IDs triés et les joindre en une seule chaîne
+                ids_tries = [str(int(item[0])) for item in classement]
+                message = ("?"+','.join(ids_tries)).encode("utf-8")
+                client.send(message)
+               
+
+            bla = True
+
+        return bla
+
+
 
     
     def Jeu(self):
         stop = True
+        Fingame = False
         while stop == True:            
             start_time = time.time() # Heure de départ de la boucle
 
             for player in self.players:
                 if not self.deplacement(player): # Le joueur n'a pas rencontré de collision, continuez le mouvement
                     pass 
+                elif self.TousMort(player) == True :
+                    stop = False
+                    pass
                 else:
                     self.MortClient(player)
                     print("COLISION !)")
-                    #player.id
-                    #stop = False
+                   # stop = False
                     pass
             self.send_game_state_to_clients() # Appelez send_game_state_to_clients pour envoyer les nouvelles positions des joueurs
  
@@ -124,6 +161,10 @@ class Game:
             elapsed_time = end_time - start_time # Calcul du temps d'attente pour atteindre la fréquence souhaitée
             sleep_time = max(0, delta_time - elapsed_time)
             time.sleep(sleep_time)
+
+        
+
+
 
         print("Fin du Jeu !")
 
@@ -195,13 +236,16 @@ def Main():
     for client in connected_clients:
         message = str(len(connected_clients)).encode("utf-8")
         client.send(message)
-#
+    
+    game.send_game_state_to_clients()
+
+    time.sleep(1)
     game_thread = threading.Thread(target=game.Jeu)  # Lancez le jeu dans un thread séparé
     game_thread.daemon = True
     game_thread.start()
-
-
+    print("jeu")
     game_thread.join()
+    print("fin jeu")
 
 if __name__ == '__main__':
     Main()
