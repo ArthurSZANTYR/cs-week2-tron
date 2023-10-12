@@ -59,6 +59,15 @@ class Game:
         self.width = 30 #* num_players
         self.height = 30 #* num_players
         self.plateau = np.zeros((self.width, self.height))
+        #off = self.width // (num_players + 1)
+        for i, c in enumerate(connected_clients):
+            x = 1 + i * 10 # Répartissez les joueurs équitablement
+        # Obtenez le nom du socket pour utiliser comme ID du joueur
+            #player_id = c.getpeername()
+            client_ip, client_port = c.getpeername()
+            self.players.append(Player(x=x, y=0, d="D", id=client_port))
+            print(c.getpeername())
+            print(client_port)
         
 
 
@@ -146,7 +155,7 @@ def threaded(c, game : Game):
 
             # Supposons que les données reçues ont la forme "socket_id, direction"
             parts = data.split(",")
-            if len(parts) == 1:
+            if len(parts) == 2:
                 socket_id, new_direction = parts  # Séparez les deux parties
                 print(socket_id+new_direction)
                 
@@ -165,8 +174,8 @@ def threaded(c, game : Game):
 
 
 def Main():
-    host = ""
-    port = 7778
+    host = "172.21.72.136"
+    port = 7777
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((host, port))
@@ -206,14 +215,7 @@ def Main():
 
         
         # Utilisez l'adresse du socket comme ID unique
-        for i, c in enumerate(connected_clients):
-            player_id = addr[1]  # Utilisez l'adresse du socket comme ID unique
-            socket_to_player_id[c.getpeername()] = player_id
-            k = 1 + i*10
-
-# Incrémente le compteur de 10 pour chaque nouvel ajout.
-            game.players.append(Player(x=k, y=0, d="D", id=player_id))
-            print(k)
+        
         
         
 
@@ -223,7 +225,16 @@ def Main():
         i = Complet()
 
     print("Exit")
+    print(len(game.players))
 
+
+    #for c in enumerate(connected_clients):
+    #        player_id = addr[1]  # Utilisez l'adresse du socket comme ID unique
+    #        socket_to_player_id[c.getpeername()] = player_id
+    #        k = 1
+    #        game.players.append(Player(x=k, y=0, d="D", id=player_id))
+    #        k = k+10
+    #        print(k)
     # Créez un nouveau jeu lorsque tous les clients sont connectés
     game.new_game()
 
@@ -245,6 +256,5 @@ def Main():
 
 if __name__ == '__main__':
     Main()
-
 
 
