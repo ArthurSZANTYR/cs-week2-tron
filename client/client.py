@@ -11,7 +11,7 @@ import numpy as np
 #'stan ip' : 172.21.72.136
 host_ip = '172.21.72.136'
 port = 7777
-nombre_joueur = 2 #pour la taille matrice
+nombre_joueur = 3 #pour la taille matrice
 client_socket_winner = 1234787  #envoi du gagnant par le server a la fin de la partie
 
 ###################
