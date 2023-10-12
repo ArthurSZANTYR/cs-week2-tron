@@ -9,10 +9,9 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-host_ip = '172.21.72.136'
+host_ip = ''
 port = 1234
 #nombre_joueur = 3 #pour la taille matrice
-client_socket_winner = 1234787  #envoi du gagnant par le server a la fin de la partie
 
 ###################
 class Client:
@@ -68,14 +67,15 @@ def get_new_direction() -> str:
 
 class Fenetre:
     def __init__(self, nombre_joueur: int) -> None:
-        self.facteur_grossisment_pygame = 10
+        self.facteur_grossisment_pygame = 20/nombre_joueur  #densité d'affichage reduit avec le nombre de joueur
         self.nb_case_matrice_par_joueur = 40
 
-        self.largeur = self.nb_case_matrice_par_joueur *nombre_joueur*self.facteur_grossisment_pygame
-        self.hauteur = self.nb_case_matrice_par_joueur *nombre_joueur*self.facteur_grossisment_pygame
-        self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
+        self.largeur_window = self.nb_case_matrice_par_joueur *nombre_joueur*self.facteur_grossisment_pygame
+        self.hauteur_window = self.nb_case_matrice_par_joueur *nombre_joueur*self.facteur_grossisment_pygame
+        self.fenetre = pygame.display.set_mode((self.largeur_window , self.hauteur_window ))
         self.matrice = np.zeros((self.nb_case_matrice_par_joueur *nombre_joueur, self.nb_case_matrice_par_joueur *nombre_joueur), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
+        ##################################################################################
         # Remplir le tour de la matrice avec -1 pour afficher les bords sur pygame 
         self.matrice[0, :] = -1  # Remplit la première ligne avec -1
         self.matrice[-1, :] = -1  # Remplit la dernière ligne avec -1
@@ -94,6 +94,8 @@ class Fenetre:
     Returns:
 
     """
+        pygame.init()
+
         # Remplir l'écran avec une couleur blanche
         self.fenetre.fill((255, 255, 255))
 
@@ -117,13 +119,26 @@ class Fenetre:
         self.fenetre.fill(color_dict[c.client_port])
         pygame.display.flip()
 
-    def render_endgame(self, client_socket_winner: int, client: Client):
-        if client_socket_winner == client.client_port:
-            #faire ecran gagnant
-            pass
-        else:
-            #faire ecran perdant
-            pass
+    def render_endgame(self, classement_joueurs: list, color_dict: dict, c: "Client"):
+        self.fenetre.fill((255, 255, 255))
+
+        # Définir la police et la taille du texte
+        font = pygame.font.Font(None, 36)
+
+        y = 100  # Position verticale de départ
+        for player in classement_joueurs:
+            # Créer un objet de texte
+            player_text = font.render(str(player), True, color_dict[player])
+
+            # Afficher le texte à l'écran
+            self.fenetre.blit(player_text, (50, y))
+
+            y += 50  # Augmenter la position verticale pour le joueur suivant
+
+        pygame.display.flip()
+        
+            
+
 
 def decrypt_data(data_brut: str)-> dict:
     """
@@ -205,7 +220,8 @@ def run()-> None:
     c = Client()
 
     while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
-        nombre_joueur = c.client_socket.recv(1024)
+        nombre_joueur = c.client_socket.recv(1024).decode('utf-8')
+        print(f'nombre_joueur : {nombre_joueur}')
         if nombre_joueur:
             break
 
@@ -248,9 +264,9 @@ def run()-> None:
 
     
     print("fin de jeu")
-    end_data = decrypt_end_data(data_brut)
+    end_data = decrypt_end_data(data_brut) #la derniere donnée envoyé est le classement
     print(end_data)
-    #f.render_endgame(end_data)
+    f.render_endgame(end_data, color_dict, c)
     time.sleep(10) #temp d'affichage du window de result
 
 run()
