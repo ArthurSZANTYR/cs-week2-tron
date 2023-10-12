@@ -7,7 +7,7 @@ import json
 
 # Paramètres du jeu
 
-FPS = 1 # Fréquence de vérification (25 fois par seconde)
+FPS = 3 # Fréquence de vérification (25 fois par seconde)
 
 # Temps entre chaque vérification
 delta_time = 1 / FPS
@@ -56,8 +56,8 @@ class Game:
         # Définissez le nombre de lignes et de colonnes en fonction du nombre de joueurs
         num_players = len(connected_clients)
         # Créez une matrice remplie de zéros pour représenter le plateau
-        self.width = 30 #* num_players
-        self.height = 30 #* num_players
+        self.width = 15 * num_players
+        self.height = 15 * num_players
         self.plateau = np.zeros((self.width, self.height))
         #off = self.width // (num_players + 1)
         for i, c in enumerate(connected_clients):
@@ -190,7 +190,7 @@ def Main():
     game = Game()
 
     def Complet():
-        if len(connected_clients) == 2:
+        if len(connected_clients) == 3:
             return False
         return True
     
