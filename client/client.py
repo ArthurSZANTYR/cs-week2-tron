@@ -10,8 +10,8 @@ import numpy as np
 
 #'stan ip' : 172.21.72.136
 host_ip = '172.21.72.136'
-port = 7777
-nombre_joueur = 3 #pour la taille matrice
+port = 1234
+#nombre_joueur = 3 #pour la taille matrice
 client_socket_winner = 1234787  #envoi du gagnant par le server a la fin de la partie
 
 ###################
@@ -67,13 +67,14 @@ def get_new_direction() -> str:
 #color_dict = {i: (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(1, 21)}
 
 class Fenetre:
-    def __init__(self, n=3, largeur_fenetre=15, hauteur_fenetre=15) -> None:
+    def __init__(self, nombre_joueur: int) -> None:
         self.facteur_grossisment_pygame = 10
+        self.nb_case_matrice_par_joueur = 40
 
-        self.largeur = largeur_fenetre*nombre_joueur*self.facteur_grossisment_pygame
-        self.hauteur = hauteur_fenetre*nombre_joueur*self.facteur_grossisment_pygame
+        self.largeur = self.nb_case_matrice_par_joueur *nombre_joueur*self.facteur_grossisment_pygame
+        self.hauteur = self.nb_case_matrice_par_joueur *nombre_joueur*self.facteur_grossisment_pygame
         self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
-        self.matrice = np.zeros((15*nombre_joueur, 15*nombre_joueur), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
+        self.matrice = np.zeros((self.nb_case_matrice_par_joueur *nombre_joueur, self.nb_case_matrice_par_joueur *nombre_joueur), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
         # Remplir le tour de la matrice avec -1 pour afficher les bords sur pygame 
         self.matrice[0, :] = -1  # Remplit la première ligne avec -1
@@ -174,12 +175,14 @@ def run()-> None:
 
     c = Client()
 
-    #while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
-    #    number_player = c.client_socket.recv(1024)
-    #    if number_player:
-    #        break
+    while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
+        nombre_joueur = c.client_socket.recv(1024)
+        if nombre_joueur:
+            break
+    
+    print("amdoulah")
 
-    f = Fenetre()
+    f = Fenetre(int(nombre_joueur))
 
     i=0 #pour identifier le premier tour de jeu
 
