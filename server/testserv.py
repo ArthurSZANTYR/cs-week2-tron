@@ -65,7 +65,13 @@ class Game:
             print(client_port)
         
 
-
+    def MortClient(self, player):
+        x, y, d, id = player.x, player.y, player.d, player.id
+        new_x, new_y = player.x, player.y
+        self.plateau[new_y][new_x] = player.id  # Nouvelle position à jour les positions sur le plateau
+        player.x, player.y = new_x, new_y  # Mettez à jour les coordonnées du joueur
+        player.id = -1
+        return False
 
     def deplacement(self, player):
         x, y, d, id = player.x, player.y, player.d, player.id
@@ -107,7 +113,9 @@ class Game:
                 if not self.deplacement(player): # Le joueur n'a pas rencontré de collision, continuez le mouvement
                     pass 
                 else:
+                    self.MortClient(player)
                     print("COLISION !)")
+                    #player.id
                     #stop = False
                     pass
             self.send_game_state_to_clients() # Appelez send_game_state_to_clients pour envoyer les nouvelles positions des joueurs
@@ -177,7 +185,7 @@ def Main():
         connected_clients.append(c)
         start_new_thread(threaded, (c, game)) # Pass the 'game' instance to the 'threaded' function
         print_lock.release()
-        if len(connected_clients) == 3:
+        if len(connected_clients) == 2:
             i = False
 
     print("Exit")
