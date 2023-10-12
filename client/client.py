@@ -80,7 +80,7 @@ class Fenetre:
         self.matrice[-1, :] = -1  # Remplit la dernière ligne avec -1
         self.matrice[:, 0] = -1  # Remplit la première colonne avec -1
         self.matrice[:, -1] = -1  # Remplit la dernière colonne avec -1
-
+        print(self.matrice)
         
     def render_matrix(self, player_data: dict, color_dict: dict) -> None:
         """
@@ -108,7 +108,7 @@ class Fenetre:
                 if position == -1:
                     pygame.draw.rect(self.fenetre, (255,0,0), (x*self.facteur_grossisment_pygame , y*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))
 
-                if position != 0:
+                if position > 0:
                     pygame.draw.rect(self.fenetre, color_dict[position], (x*self.facteur_grossisment_pygame , y*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))  #probleme sur le facteur *10 ammene des hors cadres
         pygame.display.flip()
 
