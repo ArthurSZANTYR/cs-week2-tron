@@ -9,8 +9,8 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-host_ip = ''
-port = 7778
+host_ip = '172.21.72.136'
+port = 7777
 nombre_joueur = 2 #pour la taille matrice
 client_socket_winner = 1234787  #envoi du gagnant par le server a la fin de la partie
 
@@ -75,6 +75,12 @@ class Fenetre:
         self.fenetre = pygame.display.set_mode((self.largeur, self.hauteur))
         self.matrice = np.zeros((15*nombre_joueur, 15*nombre_joueur), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
+        # Remplir le tour de la matrice avec -1 pour afficher les bords sur pygame 
+        self.matrice[0, :] = -1  # Remplit la première ligne avec -1
+        self.matrice[-1, :] = -1  # Remplit la dernière ligne avec -1
+        self.matrice[:, 0] = -1  # Remplit la première colonne avec -1
+        self.matrice[:, -1] = -1  # Remplit la dernière colonne avec -1
+
         
     def render_matrix(self, player_data: dict, color_dict: dict) -> None:
         """
@@ -99,8 +105,10 @@ class Fenetre:
         for y in range(len(self.matrice)):
             for x in range(len(self.matrice[y])):
                 position = self.matrice[x][y]
+                if position == -1:
+                    pygame.draw.rect(self.fenetre, (255,0,0), (x*self.facteur_grossisment_pygame , y*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))
+
                 if position != 0:
-                    
                     pygame.draw.rect(self.fenetre, color_dict[position], (x*self.facteur_grossisment_pygame , y*self.facteur_grossisment_pygame , self.facteur_grossisment_pygame, self.facteur_grossisment_pygame))  #probleme sur le facteur *10 ammene des hors cadres
         pygame.display.flip()
 
@@ -165,6 +173,12 @@ def run()-> None:
     """
 
     c = Client()
+
+    #while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
+    #    number_player = c.client_socket.recv(1024)
+    #    if number_player:
+    #        break
+
     f = Fenetre()
 
     i=0 #pour identifier le premier tour de jeu
