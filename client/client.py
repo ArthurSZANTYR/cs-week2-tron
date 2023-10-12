@@ -162,6 +162,10 @@ def generate_colors(player_data: dict)-> dict:
         color_dict[player_id] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
     return color_dict 
 
+def end_game(player_data: dict) -> bool:
+    # Vérifie si toutes les valeurs dans le dictionnaire sont égales à -1
+    return all(key == -1 for key in player_data.keys())
+
 
 def run()-> None:
     """
@@ -179,8 +183,6 @@ def run()-> None:
         nombre_joueur = c.client_socket.recv(1024)
         if nombre_joueur:
             break
-    
-    print("amdoulah")
 
     f = Fenetre(int(nombre_joueur))
 
@@ -197,6 +199,10 @@ def run()-> None:
         if i == 0:  #au premier tour de jeu - generation du dictionnaire de couleur
           color_dict = generate_colors(player_data)
           i+=1
+
+        if end_game(player_data):
+            print("this is the end ")
+            break
 
         print(player_data)
         f.render_matrix(player_data, color_dict)
