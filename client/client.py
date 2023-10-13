@@ -9,7 +9,7 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-host_ip = ''
+host_ip = '172.21.72.136'
 port = 1234
 #nombre_joueur = 3 #pour la taille matrice
 
@@ -224,7 +224,7 @@ def run()-> None:
         print(f'nombre_joueur : {nombre_joueur}')
         if nombre_joueur:
             break
-
+            
     f = Fenetre(int(nombre_joueur))
 
     #1er message server et attribution des couleurs
@@ -235,10 +235,11 @@ def run()-> None:
         print(f"premiere donnée {player_data}")
         if data:
             break
-
+    
     f.render_intro(color_dict, c)
 
     #boucle de jeu
+    i=0 #test pour tour de jeu - a supprimer
     while True:
         data_brut = c.client_socket.recv(1024)  # 1024 est la taille max du message
         data = data_brut.decode() 
@@ -254,8 +255,8 @@ def run()-> None:
         #if end_game(player_data):
         #   print("this is the end ")
         #    break
-
-        print(player_data)
+        i+=1
+        print(f"{player_data} ################   tour de jeu : {i} ")
         f.render_matrix(player_data, color_dict)
 
         new_d = get_new_direction()   #verifie les evenements clavier si pas de retour pas d'envoi au serveur
@@ -267,7 +268,7 @@ def run()-> None:
     end_data = decrypt_end_data(data_brut) #la derniere donnée envoyé est le classement
     print(end_data)
     f.render_endgame(end_data, color_dict, c)
-    time.sleep(10) #temp d'affichage du window de result
+    time.sleep(2) #temp d'affichage du window de result
 
 run()
 
