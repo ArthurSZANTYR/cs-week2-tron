@@ -39,6 +39,8 @@ __Rules__
 
  ___Good Game___
 
+![alt text](https://github.com/ArthurSZANTYR/cs-week2-tron/blob/main/image/ScreenGameTron.jpeg?raw=true)
+
 ## Project Structure
 
 The project is organized as follows:
