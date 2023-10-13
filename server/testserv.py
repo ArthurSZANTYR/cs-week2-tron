@@ -247,7 +247,7 @@ def threaded(c, game : Game):
 
 
 def Main():
-    host = "172.21.72.136"
+    host = ""
     port = 1995
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
