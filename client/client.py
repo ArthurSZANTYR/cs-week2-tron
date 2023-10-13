@@ -227,6 +227,7 @@ def run()-> None:
     """
 
     while True:
+        print("back againihougiu")
         c = Client()
 
         while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
@@ -279,13 +280,17 @@ def run()-> None:
         print(type(end_data))
         f.render_endgame(end_data, color_dict, c)
         # Attendez que l'utilisateur appuie sur "q" ou "a" pour quitter ou rejouer
-        while True:
+
+        restart = False
+        while restart == False:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         exit()                       # Quitte le programme
                     elif event.key == pygame.K_a:
-                        break                       # Sort de la boucle de fin de jeu pour rejouer
+                        restart = True             # Sort de la boucle de fin de jeu pour rejouer
+
+        
                     
 
 run()
