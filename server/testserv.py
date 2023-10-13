@@ -85,6 +85,7 @@ class Game:
         self.plateau[-1, :] = -1  # Remplit la dernière ligne avec -1
         self.plateau[:, 0] = -1  # Remplit la première colonne avec -1
         self.plateau[:, -1] = -1  # Remplit la dernière colonne avec -1
+
         for i, c in enumerate(connected_clients):
             k=0
             x = 10 + k*off # Répartissez les joueurs équitablement
