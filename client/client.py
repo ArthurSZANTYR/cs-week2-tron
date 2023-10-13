@@ -170,18 +170,58 @@ class Fenetre:
 
         pygame.display.flip()
 
-    
-    def render_waiting():
-        fenetre = pygame.display.set_mode((800, 800))
-        # Charger l'image de fond
-        background_image = pygame.image.load("../image/waiting_menu.png")
 
-        # Redimensionnez l'image au même que la fenêtre
-        background_image = pygame.transform.scale(background_image, (800, 800))
 
-        # Affichez l'image de fond
-        fenetre.blit(background_image, (0, 0))
-        pygame.display.flip()
+    #def render_waiting():
+    #    pygame.init()
+    #    largeur_window = 800
+    #    hauteur_window = 800
+    #    fenetre = pygame.display.set_mode((largeur_window, hauteur_window))
+#
+    #    # Dimensions du rectangle de chargement
+    #    rect_width = 400
+    #    rect_height = 20
+#
+    #    # Position du rectangle de chargement
+    #    rect_x = (largeur_window - rect_width) // 2
+    #    rect_y = (hauteur_window - rect_height) // 2
+#
+    #    # Couleurs du rectangle de chargement
+    #    rect_color = (0, 128, 255)  # Couleur bleue
+    #    background_color = (200, 200, 200)  # Couleur de l'arrière-plan
+#
+    #    # Avancement du rectangle de chargement (de 0 à rect_width)
+    #    progress = 0
+#
+    #    clock = pygame.time.Clock()
+#
+    #    running = True
+    #    while running:
+    #        for event in pygame.event.get():
+    #            if event.type == pygame.QUIT:
+    #                running = False
+#
+    #        # Dessiner l'arrière-plan
+    #        fenetre.fill(background_color)
+#
+    #        # Dessiner le rectangle de chargement
+    #        pygame.draw.rect(fenetre, rect_color, (rect_x, rect_y, progress, rect_height))
+#
+    #        # Mettre à jour l'affichage
+    #        pygame.display.flip()
+#
+    #        # Simuler un chargement (remplacez cette partie par votre logique de chargement réelle)
+    #        if progress < rect_width:
+    #            progress += 2  # Augmentez la valeur de progression (ajustez selon vos besoins)
+    #        else:
+    #            progress = 0  # Réinitialisez la barre de chargement
+#
+    #        clock.tick(60)  # Limitez la fréquence de rafraîchissement (60 FPS)
+#
+
+
+
+
         
             
 
@@ -212,19 +252,11 @@ def decrypt_data(data_brut: str)-> dict:
     return positions
 
 def decrypt_end_data(data_brut: bytes) -> list:
-    # Décoder les données brutes en une chaîne de caractères (str)
+
     data_str = data_brut.decode('utf-8')
-
-    # Enlevez le premier caractère (par exemple, "?")
     data_str = data_str[1:]
-
-    # Divisez la chaîne en fonction de '!' pour obtenir la liste
     data = data_str.split('!')[0]
-
-    # Divisez la liste obtenue en fonction de ',' pour obtenir les éléments individuels
     classement = data.split(',')
-    
-    # Convertissez les éléments en entiers si nécessaire
     classement = [int(item) for item in classement]
 
     return classement
@@ -249,34 +281,27 @@ def generate_colors(player_data: dict)-> dict:
     return color_dict 
 
 def end_game(data_brut: str) -> bool:
-    # Vérifie si data_brut commence par un certain caractère (par exemple, "?")
+    # Vérifie si data_brut commence par un certain caractère "?"
     return data_brut.startswith("?")
 
 
-def run()-> None:
-    """
-    Fonction qui gere les différentes etapes de jeu
-
-    Args:
-
-    Returns:
-    
-    """
-
+def run() -> None:
     while True:
-        print("back againihougiu")
         c = Client()
 
-        #thread rende_waiting
+        #thread waiting window
         #render_thread = threading.Thread(target=Fenetre.render_waiting)
         #render_thread.start()
 
-        while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
+        waiting_for_players = True  # Initialisation du drapeau d'attente
+
+        while waiting_for_players:
+            # Attendre de recevoir le nombre de joueurs du serveur
             nombre_joueur = c.client_socket.recv(1024).decode('utf-8')
-            print(f'nombre_joueur : {nombre_joueur}')
             if nombre_joueur:
-                break
-        #pygame.quit() #pour fermer la fenetre de chargement
+                waiting_for_players = False  # La condition a été satisfaite, sortez de la boucle
+
+        #pygame.quit() 
         f = Fenetre(int(nombre_joueur))
 
         #1er message server et attribution des couleurs
@@ -284,7 +309,6 @@ def run()-> None:
             data = c.client_socket.recv(1024) 
             player_data = decrypt_data(data.decode())
             color_dict = generate_colors(player_data)
-            print(f"premiere donnée {player_data}")
             if data:
                 break
             
@@ -295,9 +319,7 @@ def run()-> None:
         while True:
             data_brut = c.client_socket.recv(1024)  # 1024 est la taille max du message
             data = data_brut.decode() 
-            print(f"ici datatatata : {data}")
             if end_game(data):  #pour le dernier tour de jeu - le serveur femre donc plus de data - je sort de la boucle
-                print("endddddddddddddd")
                 break 
             #print("herre")
 
@@ -308,19 +330,16 @@ def run()-> None:
             #   print("this is the end ")
             #    break
             i+=1
-            print(f"{player_data} ################   tour de jeu : {i} ")
             f.render_matrix(player_data, color_dict)
 
             new_d = get_new_direction()   #verifie les evenements clavier si pas de retour pas d'envoi au serveur
             if new_d != None:   
                 send_to_server(c.client_socket, f"{c.client_port},{new_d}")
 
-        print("iccciiciciciicici")
         end_data = decrypt_end_data(data_brut) #la derniere donnée envoyé est le classement
-        print(end_data)
-        print(type(end_data))
+
         f.render_endgame(end_data, color_dict, c)
-        # Attendez que l'utilisateur appuie sur "q" ou "a" pour quitter ou rejouer
+
 
         restart = False
         while restart == False:
