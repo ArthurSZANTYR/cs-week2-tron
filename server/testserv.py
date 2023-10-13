@@ -42,12 +42,6 @@ class Game:
         players_data = ";".join(all_players_data)  # Joindre les données de tous les joueurs avec des points-virgules
         self.game_state_queue.put(players_data + "!" )
 
-        #for client in connected_clients:
-        #    try:
-        #        client.send((players_data + "!").encode("utf-8"))
-        #    except Exception as e:
-        #        print(e)
-        #        connected_clients.remove(client)
 
     def send_game_state_worker(self):
         counter = 0
@@ -63,14 +57,6 @@ class Game:
                 except Exception as e:
                    # print(e)
                     connected_clients.remove(client)
-
-
-
-    
-
-   
-
-
 
 
 
@@ -90,9 +76,7 @@ class Game:
             k=0
             x = 10 + k*off # Répartissez les joueurs équitablement
             client_port = c.getpeername()[1] # Obtenez le nom du socket pour utiliser comme ID du joueur
-            #client_port = c.addr[1]
-            #print(c.getpeername())
-            #print(client_port)
+
             k = k+1
             print(i)
 
@@ -158,7 +142,6 @@ class Game:
             x, y, d, id = player.x, player.y, player.d, player.id
             liste.append(player.id)
 
-        #print(liste)
 
         bla = False
 
@@ -197,8 +180,7 @@ class Game:
         send_game_state_thread.start()
         k=0
         while stop == True:            
-             # Heure de départ de la boucle
-            # self.send_game_state_worker() 
+
 
             for player in self.players:
                 if not self.deplacement(player): # Le joueur n'a pas rencontré de collision, continuez le mouvement
@@ -209,7 +191,6 @@ class Game:
                 else:
                     self.MortClient(player)
                    # print("COLISION !)")
-                   # stop = False
                     pass
             
             self.send_game_state_to_clients()
@@ -219,32 +200,15 @@ class Game:
             
 
             start_time = time.time()
-            
-            # data = self.game_state_queue.get()
-            # self.send_game_state_worker(data)
-            # print((self.game_state_queue.qsize))
-            # print(k)
-            # k+=1
 
-            # print("cacaca")
-          
-        
-              # Obtenez les données de la file d'attente
-            
-            #self.send_game_state_to_clients() # Appelez send_game_state_to_clients pour envoyer les nouvelles positions des joueurs
-           
-            # print("joooo")
+
             end_time = time.time() # Heure de fin de la boucle       
             elapsed_time = end_time - start_time # Calcul du temps d'attente pour atteindre la fréquence souhaitée
             sleep_time = max(0, delta_time - elapsed_time)
             time.sleep(sleep_time)
             
 
-            
-
-
-
-       # print("Fin du Jeu !")
+        print("Fin du Jeu !")
 
     
 
@@ -256,13 +220,11 @@ def threaded(c, game : Game):
 
     try:
         client_name = c.getpeername()
-       # client_id = socket_to_player_id.get(client_name, None)
 
         while True:
             data = c.recv(1024).decode("utf-8")
             if len(data) == 0:
-               # print(f"Client {client_name} disconnected")
-              #  connected_clients.remove(c)
+              
                 break
 
             parts = data.split(",")
@@ -272,8 +234,7 @@ def threaded(c, game : Game):
                 
                 
                 for player in game.players: # Recherchez le joueur correspondant à l'ID du socket
-                   # print(f"Socket id {socket_id} ")
-                   # print(f"Client id {player.id} ")
+
                     if int(player.id) == int(socket_id):
                         player.update_direction(new_direction)
            
@@ -293,17 +254,13 @@ def Main():
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((host, port))
     print("Socket lié au port", port)
-    
     s.listen()
-   # print("Socket en écoute")
-    # Afficher la liste des clients connectés
 
-     # Créez une instance de la classe Game
     def Complet():
             if len(connected_clients) == 2:
                 return False
             return True
-   # print("buggg")
+
     while True :
         
         game = Game()
@@ -314,23 +271,6 @@ def Main():
             print_lock.acquire()
             print('Connected to:', addr[0], ':', addr[1])
             connected_clients.append(c)
-
-
-
-            #off = self.width // (num_players + 1)
-            #for i, c in enumerate(connected_clients):
-            #    x = 1 + i * off  # Répartissez les joueurs équitablement
-            ## Obtenez le nom du socket pour utiliser comme ID du joueur
-            #    #player_id = c.getpeername()
-            #    client_ip, client_port = c.getpeername()
-            #    self.players.append(Player(x=x, y=0, d="D", id=client_port))
-            #    print(c.getpeername())
-            #    print(client_port)
-
-
-            # Utilisez l'adresse du socket comme ID unique
-
-
 
 
             # Pass the 'game' instance to the 'threaded' function
@@ -345,8 +285,7 @@ def Main():
             client.send(message)
         
         game.send_game_state_to_clients()
-        #game.send_game_state_worker()
-        #time.sleep(4)
+
 
         game_thread = threading.Thread(target=game.Jeu)  # Lancez le jeu dans un thread séparé
         game_thread.daemon = True
