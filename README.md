@@ -1,4 +1,5 @@
-# cs-week2-tron
+ $${\color{red}CS-WEEK2-TRON}$$
+ 
 Createch - computer science project week2 - Tron light cycle game in network
 ## Contributors
 ##### -Arthur SZANTYR
@@ -13,6 +14,7 @@ The instructions were to use sockets and multi threading to make this game work
 
 ## Installation and Usage
 To use the game follow these steps :
+
 
 __Installation__
 * Open the file "Server.py" 
