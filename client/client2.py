@@ -9,7 +9,6 @@ import numpy as np
 ###################
 
 #'stan ip' : 172.21.72.136
-# art ip : 172.21.72.105
 host_ip = '172.21.72.136'
 port = 1995
 #nombre_joueur = 3 #pour la taille matrice
@@ -123,16 +122,11 @@ class Fenetre:
     def render_endgame(self, classement_joueurs: list, color_dict: dict, c: "Client"):
         self.fenetre.fill((255, 255, 255))
 
-        print(f"   uidgviduscbsiubc {classement_joueurs}")
-        #classement_joueurs = classement_joueurs.reverse()
-        print(f"   uidgviduscbsiubc {classement_joueurs}")
-
         # Définir la police et la taille du texte
         font = pygame.font.Font(None, 36)
 
         y = 100  # Position verticale de départ
         for player in classement_joueurs:
-            print(f" player : {player}")
             # Créer un objet de texte
             player_text = font.render(str(player), True, color_dict[player])
 
@@ -140,9 +134,6 @@ class Fenetre:
             self.fenetre.blit(player_text, (50, y))
 
             y += 50  # Augmenter la position verticale pour le joueur suivant
-
-            message = font.render("Appuyez sur 'a' pour refaire une partie ou 'q' pour quitter le jeu", True, (0, 0, 0))
-            self.fenetre.blit(message, (50, y + 50))  # Augmentez la position verticale pour le message
 
         pygame.display.flip()
         
@@ -226,67 +217,57 @@ def run()-> None:
     
     """
 
+    c = Client()
+
+    while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
+        nombre_joueur = c.client_socket.recv(1024).decode('utf-8')
+        print(f'nombre_joueur : {nombre_joueur}')
+        if nombre_joueur:
+            break
+
+    f = Fenetre(int(nombre_joueur))
+
+    #1er message server et attribution des couleurs
     while True:
-        c = Client()
+        data = c.client_socket.recv(1024) 
+        player_data = decrypt_data(data.decode())
+        color_dict = generate_colors(player_data)
+        print(f"premiere donnée {player_data}")
+        if data:
+            break
 
-        while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
-            nombre_joueur = c.client_socket.recv(1024).decode('utf-8')
-            print(f'nombre_joueur : {nombre_joueur}')
-            if nombre_joueur:
-                break
+    f.render_intro(color_dict, c)
 
-        f = Fenetre(int(nombre_joueur))
+    #boucle de jeu
+    while True:
+        data_brut = c.client_socket.recv(1024)  # 1024 est la taille max du message
+        data = data_brut.decode() 
+        print(f"ici datatatata : {data}")
+        if end_game(data):  #pour le dernier tour de jeu - le serveur femre donc plus de data - je sort de la boucle
+            print("endddddddddddddd")
+            break
+        print("herre")
+        
+        
+        player_data = decrypt_data(data) #pour le dernier tour de jeu - le dernier message du serveur sera le classement que je garde en mémoire
 
-        #1er message server et attribution des couleurs
-        while True:
-            data = c.client_socket.recv(1024) 
-            player_data = decrypt_data(data.decode())
-            color_dict = generate_colors(player_data)
-            print(f"premiere donnée {player_data}")
-            if data:
-                break
-            
-        f.render_intro(color_dict, c)
+        #if end_game(player_data):
+        #   print("this is the end ")
+        #    break
 
-        #boucle de jeu
-        i=0 #test pour tour de jeu - a supprimer
-        while True:
-            data_brut = c.client_socket.recv(1024)  # 1024 est la taille max du message
-            data = data_brut.decode() 
-            print(f"ici datatatata : {data}")
-            if end_game(data):  #pour le dernier tour de jeu - le serveur femre donc plus de data - je sort de la boucle
-                print("endddddddddddddd")
-                break 
-            #print("herre")
+        print(player_data)
+        f.render_matrix(player_data, color_dict)
 
+        new_d = get_new_direction()   #verifie les evenements clavier si pas de retour pas d'envoi au serveur
+        if new_d != None:   
+            send_to_server(c.client_socket, f"{c.client_port},{new_d}")
 
-            player_data = decrypt_data(data) #pour le dernier tour de jeu - le dernier message du serveur sera le classement que je garde en mémoire
-
-            #if end_game(player_data):
-            #   print("this is the end ")
-            #    break
-            i+=1
-            print(f"{player_data} ################   tour de jeu : {i} ")
-            f.render_matrix(player_data, color_dict)
-
-            new_d = get_new_direction()   #verifie les evenements clavier si pas de retour pas d'envoi au serveur
-            if new_d != None:   
-                send_to_server(c.client_socket, f"{c.client_port},{new_d}")
-
-        print("iccciiciciciicici")
-        end_data = decrypt_end_data(data_brut) #la derniere donnée envoyé est le classement
-        print(end_data)
-        print(type(end_data))
-        f.render_endgame(end_data, color_dict, c)
-        # Attendez que l'utilisateur appuie sur "q" ou "a" pour quitter ou rejouer
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        exit()                       # Quitte le programme
-                    elif event.key == pygame.K_a:
-                        break                       # Sort de la boucle de fin de jeu pour rejouer
-                    
+    
+    print("fin de jeu")
+    end_data = decrypt_end_data(data_brut) #la derniere donnée envoyé est le classement
+    print(end_data)
+    f.render_endgame(end_data, color_dict, c)
+    time.sleep(10) #temp d'affichage du window de result
 
 run()
 
