@@ -4,9 +4,10 @@ import threading
 import time
 import numpy as np
 import json
+import queue
 
 
-FPS = 5 # Fréquence de vérification (25 fois par seconde)
+FPS = 20 # Fréquence de vérification (25 fois par seconde)
 delta_time = 1 / FPS # Temps entre chaque vérification
 
 print_lock = threading.Lock()
@@ -29,6 +30,8 @@ class Game:
         self.players : list[Player] = []
         self.plateau = []
 
+        self.game_state_queue = queue.Queue()
+
     def send_game_state_to_clients(self):
         all_players_data = []
 
@@ -37,13 +40,35 @@ class Game:
             all_players_data.append(player_data)
 
         players_data = ";".join(all_players_data)  # Joindre les données de tous les joueurs avec des points-virgules
+        self.game_state_queue.put(players_data + "!" )
 
-        for client in connected_clients:
-            try:
-                client.send((players_data + "!").encode("utf-8"))
-            except Exception as e:
-                print(e)
-                connected_clients.remove(client)
+        #for client in connected_clients:
+        #    try:
+        #        client.send((players_data + "!").encode("utf-8"))
+        #    except Exception as e:
+        #        print(e)
+        #        connected_clients.remove(client)
+
+    def send_game_state_worker(self):
+        counter = 0
+        while True:
+            data = self.game_state_queue.get()
+            # print(f'data to send : {data}')
+            for client in connected_clients:
+                try:
+
+                    client.send((data + "!").encode("utf-8"))
+                    counter+=1
+                    print(f'couzaeiuiazteu : {counter}')
+                except Exception as e:
+                    print(e)
+                    connected_clients.remove(client)
+
+
+
+    
+
+   
 
 
 
@@ -56,6 +81,10 @@ class Game:
         self.height = gross * num_players
         self.plateau = np.zeros((self.width, self.height))  # Créez une matrice remplie de zéros pour représenter le plateau
         off = self.width // (num_players + 1)
+        self.plateau[0, :] = -1  # Remplit la première ligne avec -1
+        self.plateau[-1, :] = -1  # Remplit la dernière ligne avec -1
+        self.plateau[:, 0] = -1  # Remplit la première colonne avec -1
+        self.plateau[:, -1] = -1  # Remplit la dernière colonne avec -1
         for i, c in enumerate(connected_clients):
             x = 1 + i*off # Répartissez les joueurs équitablement
         
@@ -108,7 +137,7 @@ class Game:
             x, y, d, id = player.x, player.y, player.d, player.id
             liste.append(player.id)
 
-        print(liste)
+        #print(liste)
 
         bla = False
 
@@ -141,8 +170,13 @@ class Game:
     def Jeu(self):
         stop = True
         Fingame = False
+       
+        send_game_state_thread = threading.Thread(target=self.send_game_state_worker, daemon=True)
+        send_game_state_thread.start()
+        k=0
         while stop == True:            
-            start_time = time.time() # Heure de départ de la boucle
+             # Heure de départ de la boucle
+            # self.send_game_state_worker() 
 
             for player in self.players:
                 if not self.deplacement(player): # Le joueur n'a pas rencontré de collision, continuez le mouvement
@@ -155,18 +189,38 @@ class Game:
                     print("COLISION !)")
                    # stop = False
                     pass
-            self.send_game_state_to_clients() # Appelez send_game_state_to_clients pour envoyer les nouvelles positions des joueurs
- 
+
+            self.send_game_state_to_clients()
+
+            start_time = time.time()
+            
+            # data = self.game_state_queue.get()
+            # self.send_game_state_worker(data)
+            # print((self.game_state_queue.qsize))
+            # print(k)
+            # k+=1
+
+            # print("cacaca")
+          
+        
+              # Obtenez les données de la file d'attente
+            
+            #self.send_game_state_to_clients() # Appelez send_game_state_to_clients pour envoyer les nouvelles positions des joueurs
+           
+            # print("joooo")
             end_time = time.time() # Heure de fin de la boucle       
             elapsed_time = end_time - start_time # Calcul du temps d'attente pour atteindre la fréquence souhaitée
             sleep_time = max(0, delta_time - elapsed_time)
             time.sleep(sleep_time)
+            
 
-        
+            
 
 
 
         print("Fin du Jeu !")
+
+    
 
 
 socket_to_player_id = {}
@@ -243,7 +297,6 @@ def Main():
     game_thread = threading.Thread(target=game.Jeu)  # Lancez le jeu dans un thread séparé
     game_thread.daemon = True
     game_thread.start()
-    print("jeu")
     game_thread.join()
     print("fin jeu")
 
