@@ -49,4 +49,5 @@ The project is organized as follows:
 ## Thank you and conclusion
 We would like to thank Gregor for offering us this exercise that we have fun doing despite the many problems encountered.
 This type of exercise is pleasant to learn new knowledge in python, project management, management of Github and the fact that we are free of our time is more challenging.
+
 Thanks also to @matthieu-sgi for his help and for his time
