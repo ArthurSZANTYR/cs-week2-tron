@@ -13,6 +13,8 @@ The instructions were to use sockets and multi threading to make this game work
 
 ## Installation and Usage
 To use the game follow these steps :
+
+__Installation__
 * Open the file "Server.py" 
   * Choose the number of players in the "Hand"
   * Put the right ip that will host the server the time of the part "host = "x.x.x.x""
@@ -21,12 +23,30 @@ To use the game follow these steps :
   * Put the right ip that host the server "host = "x.x.x.x""
   * Put the right port "port = xxxx"
 
+__Usage__
+* Make sure that the file "Server.py" is launched
+* Launch each one "Client.py" file per player
+  * When the right number of players are connected, the game will start
+ *  At the time of the launch of the game you will see your color highlighted on the screen remember the good it is important !
+* You will appear in different places of the map, use the arrow keys to orient yourself
+* At the end of the game the ranking is displayed, you can either quit the game or want to replay (follow the instructions)
+
+__Rules__
+* You advance at a constant speed on the map, you leave behind a continuous trace of your color
+* If you run into a wall (map limit), you lose
+* If you run in a track you lose (even yours) so a half turn makes you lose also  ;)
+* The winner is the last survivor, the one with the longest trace
+
+ ___Good Game___
+
 ## Project Structure
 
 The project is organized as follows:
 
-- `Code_Phased_Array_Speaker_esp_idf` directory contains the main application code
-- `Kicad_Phased_Array_Speaker` directory contains the hardware schematics and PCB layout files
+- `Server.py` file containing the server, calculations of positions, colisions, creations of players and others...
+- `Client.py` file containing the client part, therefore only the display and sending of data (change of direction)
 
-## Merci 
-@matthieu-sgi
+## Thank you and conclusion
+We would like to thank Gregor for offering us this exercise that we have fun doing despite the many problems encountered.
+This type of exercise is pleasant to learn new knowledge in python, project management, management of Github and the fact that we are free of our time is more challenging.
+Thanks also to @matthieu-sgi for his help and for his time
