@@ -34,7 +34,7 @@ __Usage__
 __Rules__
 * You advance at a constant speed on the map, you leave behind a continuous trace of your color
 * If you run into a wall (map limit), you lose
-* If you run in a track you lose (even yours) so a half turn makes you lose also  ;)
+* If you run in a track you lose (even yours) so a half turn makes you lose also 😉
 * The winner is the last survivor, the one with the longest trace
 
  ___Good Game___
