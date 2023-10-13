@@ -59,7 +59,7 @@ class Game:
 
                     client.send((data + "!").encode("utf-8"))
                     counter+=1
-                   # print(f'couzaeiuiazteu : {counter}')
+                    print(f'couzaeiuiazteu : {data}')
                 except Exception as e:
                    # print(e)
                     connected_clients.remove(client)
@@ -179,7 +179,8 @@ class Game:
                 ids_tries = [str(int(item[0])) for item in classement]
                 message = ("?"+','.join(ids_tries) +"!").encode("utf-8")
                 client.send(message)
-               
+                print("envoie classement")
+                print(message)
 
             bla = True
 
