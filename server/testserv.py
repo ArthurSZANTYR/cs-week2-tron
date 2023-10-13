@@ -7,7 +7,7 @@ import json
 import queue
 
 
-FPS = 20 # Fréquence de vérification (25 fois par seconde)
+FPS = 20# Fréquence de vérification (25 fois par seconde)
 delta_time = 1 / FPS # Temps entre chaque vérification
 
 print_lock = threading.Lock()
@@ -59,9 +59,9 @@ class Game:
 
                     client.send((data + "!").encode("utf-8"))
                     counter+=1
-                    print(f'couzaeiuiazteu : {counter}')
+                   # print(f'couzaeiuiazteu : {counter}')
                 except Exception as e:
-                    print(e)
+                   # print(e)
                     connected_clients.remove(client)
 
 
@@ -86,13 +86,33 @@ class Game:
         self.plateau[:, 0] = -1  # Remplit la première colonne avec -1
         self.plateau[:, -1] = -1  # Remplit la dernière colonne avec -1
         for i, c in enumerate(connected_clients):
-            x = 1 + i*off # Répartissez les joueurs équitablement
-        
+            k=0
+            x = 10 + k*off # Répartissez les joueurs équitablement
             client_port = c.getpeername()[1] # Obtenez le nom du socket pour utiliser comme ID du joueur
-            self.players.append(Player(x=x, y=0, d="D", id=client_port))
-            print(c.getpeername())
-            print(client_port)
+            #client_port = c.addr[1]
+            #print(c.getpeername())
+            #print(client_port)
+            k = k+1
+            print(i)
+
+            if num_players <= 4:
+                if i == 0:
+                    self.players.append(Player(x=1 , y= self.height//2, d="R", id=client_port))
+                elif i == 1:
+                    self.players.append(Player(x=self.width -1 , y=self.height//2, d="L", id=client_port))
+                elif i == 2:
+                    self.players.append(Player(x=self.width//2, y=1, d="D", id=client_port))
+                elif i == 3:
+                    self.players.append(Player(x=self.width//2, y=self.height -1 , d="U", id=client_port))
+
+            elif num_players >= 5 :
+                self.players.append(Player(x=x, y=0, d="D", id=client_port))
+            
+            
+
         
+
+                
 
     def MortClient(self, player):
         x, y, d, id = player.x, player.y, player.d, player.id
@@ -156,7 +176,7 @@ class Game:
             for client in connected_clients:
                 # Créer une liste des IDs triés et les joindre en une seule chaîne
                 ids_tries = [str(int(item[0])) for item in classement]
-                message = ("?"+','.join(ids_tries)).encode("utf-8")
+                message = ("?"+','.join(ids_tries) +"!").encode("utf-8")
                 client.send(message)
                
 
@@ -186,11 +206,15 @@ class Game:
                     pass
                 else:
                     self.MortClient(player)
-                    print("COLISION !)")
+                   # print("COLISION !)")
                    # stop = False
                     pass
-
+            
             self.send_game_state_to_clients()
+            if k ==0:
+                time.sleep(4)
+                k+=1
+            
 
             start_time = time.time()
             
@@ -218,7 +242,7 @@ class Game:
 
 
 
-        print("Fin du Jeu !")
+       # print("Fin du Jeu !")
 
     
 
@@ -235,8 +259,8 @@ def threaded(c, game : Game):
         while True:
             data = c.recv(1024).decode("utf-8")
             if len(data) == 0:
-                print(f"Client {client_name} disconnected")
-                connected_clients.remove(c)
+               # print(f"Client {client_name} disconnected")
+              #  connected_clients.remove(c)
                 break
 
             parts = data.split(",")
@@ -246,59 +270,95 @@ def threaded(c, game : Game):
                 
                 
                 for player in game.players: # Recherchez le joueur correspondant à l'ID du socket
-                    print(f"Socket id {socket_id} ")
-                    print(f"Client id {player.id} ")
+                   # print(f"Socket id {socket_id} ")
+                   # print(f"Client id {player.id} ")
                     if int(player.id) == int(socket_id):
                         player.update_direction(new_direction)
-                        # break
+           
+        c.close             # break
 
     except ConnectionResetError:
         print(f"Client {client_name} disconnected")
-        connected_clients.remove(c)
+    #    
+    #    
 
 
 def Main():
     host = "172.21.72.136"
-    port = 1234
+    port = 1995
+    
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((host, port))
     print("Socket lié au port", port)
-    s.listen(5)
-    print("Socket en écoute")
-
-    print("Clients connectés :", connected_clients)  # Afficher la liste des clients connectés
- 
-    game = Game() # Créez une instance de la classe Game
-
-
-    i = True
-    while i:
-        c, addr = s.accept()
-        print_lock.acquire()
-        print('Connected to:', addr[0], ':', addr[1])
-        connected_clients.append(c)
-        start_new_thread(threaded, (c, game)) # Pass the 'game' instance to the 'threaded' function
-        print_lock.release()
-        if len(connected_clients) == 2:
-            i = False
-
-    print("Exit")
-    print(len(connected_clients))
     
-    game.new_game() # Créez un nouveau jeu lorsque tous les clients sont connectés
-    for client in connected_clients:
-        message = str(len(connected_clients)).encode("utf-8")
-        client.send(message)
-    
-    game.send_game_state_to_clients()
+    s.listen()
+   # print("Socket en écoute")
+    # Afficher la liste des clients connectés
 
-    time.sleep(1)
-    game_thread = threading.Thread(target=game.Jeu)  # Lancez le jeu dans un thread séparé
-    game_thread.daemon = True
-    game_thread.start()
-    game_thread.join()
-    print("fin jeu")
+     # Créez une instance de la classe Game
+    def Complet():
+            if len(connected_clients) == 2:
+                return False
+            return True
+   # print("buggg")
+    while True :
+        
+        game = Game()
+
+        i = True
+        while i:
+            c, addr = s.accept()
+            print_lock.acquire()
+            print('Connected to:', addr[0], ':', addr[1])
+            connected_clients.append(c)
+
+
+
+            #off = self.width // (num_players + 1)
+            #for i, c in enumerate(connected_clients):
+            #    x = 1 + i * off  # Répartissez les joueurs équitablement
+            ## Obtenez le nom du socket pour utiliser comme ID du joueur
+            #    #player_id = c.getpeername()
+            #    client_ip, client_port = c.getpeername()
+            #    self.players.append(Player(x=x, y=0, d="D", id=client_port))
+            #    print(c.getpeername())
+            #    print(client_port)
+
+
+            # Utilisez l'adresse du socket comme ID unique
+
+
+
+
+            # Pass the 'game' instance to the 'threaded' function
+            start_new_thread(threaded, (c, game))
+            print_lock.release()
+            i = Complet()
+        print("Exit")
+        print(f'Nbr Connexion client : {len(connected_clients)}')
+        game.new_game() # Créez un nouveau jeu lorsque tous les clients sont connectés
+        for client in connected_clients:
+            message = str(len(connected_clients)).encode("utf-8")
+            client.send(message)
+        
+        game.send_game_state_to_clients()
+        #game.send_game_state_worker()
+        #time.sleep(4)
+
+        game_thread = threading.Thread(target=game.Jeu)  # Lancez le jeu dans un thread séparé
+        game_thread.daemon = True
+        
+        game_thread.start()
+        #time.sleep(4)
+        game_thread.join()
+        print("fin jeu")
+        time.sleep(1)
+        connected_clients.clear()
+
+        
+
+
 
 if __name__ == '__main__':
     Main()
