@@ -5,16 +5,21 @@ import sys
 import time
 import random
 import numpy as np 
+import threading
+
 
 ###################
 
 #'stan ip' : 172.21.72.136
 # art ip : 172.21.72.105
-host_ip = '172.21.72.136'
+host_ip = ''
 port = 1995
 #nombre_joueur = 3 #pour la taille matrice
 
 ###################
+
+pygame.init()
+
 class Client:
     def __init__(self) -> None:
         
@@ -76,6 +81,9 @@ class Fenetre:
         self.fenetre = pygame.display.set_mode((self.largeur_window , self.hauteur_window ))
         self.matrice = np.zeros((self.nb_case_matrice_par_joueur *nombre_joueur, self.nb_case_matrice_par_joueur *nombre_joueur), dtype=int)  # Créez une matrice de dimensions n x n remplie de zéros de type entier
 
+        self.font36 = pygame.font.Font("../font/ethnocentric.otf", 36)
+        self.font22 = pygame.font.Font("../font/ethnocentric.otf", 22)
+        self.font_classic22 = pygame.font.Font("../font/Cocogoose.ttf", 22)
         ##################################################################################
         # Remplir le tour de la matrice avec -1 pour afficher les bords sur pygame 
         self.matrice[0, :] = -1  # Remplit la première ligne avec -1
@@ -118,7 +126,17 @@ class Fenetre:
 
     def render_intro(self, color_dict: dict, c: "Client")-> None:
         self.fenetre.fill(color_dict[c.client_port])
+
+        
+        text = self.font36.render("Voici ta couleur", True, (255, 255, 255))
+
+        text_rect = text.get_rect()
+        text_rect.center = (self.largeur_window // 2, self.hauteur_window // 2)
+
+        self.fenetre.blit(text, text_rect.topleft)
+
         pygame.display.flip()
+
 
     def render_endgame(self, classement_joueurs: list, color_dict: dict, c: "Client"):
         self.fenetre.fill((255, 255, 255))
@@ -127,23 +145,42 @@ class Fenetre:
         #classement_joueurs = classement_joueurs.reverse()
         print(f"   uidgviduscbsiubc {classement_joueurs}")
 
-        # Définir la police et la taille du texte
-        font = pygame.font.Font(None, 36)
-
         y = 100  # Position verticale de départ
+
+        # Affiche "Classement final de la partie" en utilisant une police plus grande (font48)
+        title_text = self.font22.render("Classement final de la partie", True, (0, 0, 0))
+        title_rect = title_text.get_rect(center=(self.largeur_window // 2, y))
+        self.fenetre.blit(title_text, title_rect.topleft)
+        y += title_rect.height + 20  # Augmente la position verticale pour le classement
+
+        i = 1
         for player in classement_joueurs:
             print(f" player : {player}")
-            # Créer un objet de texte
-            player_text = font.render(str(player), True, color_dict[player])
+            # Crée un objet de texte
+            player_text = self.font22.render(str(f"{i} - {player}"), True, color_dict[player])
+            i += 1
 
             # Afficher le texte à l'écran
             self.fenetre.blit(player_text, (50, y))
 
             y += 50  # Augmenter la position verticale pour le joueur suivant
 
-            message = font.render("Appuyez sur 'a' pour refaire une partie ou 'q' pour quitter le jeu", True, (0, 0, 0))
-            self.fenetre.blit(message, (50, y + 50))  # Augmentez la position verticale pour le message
+        message = self.font_classic22.render("Appuyez sur 'a' pour refaire une partie ou 'q' pour quitter le jeu", True, (0, 0, 0))
+        self.fenetre.blit(message, (50, y + 100))  # Augmentez la position verticale pour le message
 
+        pygame.display.flip()
+
+    
+    def render_waiting():
+        fenetre = pygame.display.set_mode((800, 800))
+        # Charger l'image de fond
+        background_image = pygame.image.load("../image/waiting_menu.png")
+
+        # Redimensionnez l'image au même que la fenêtre
+        background_image = pygame.transform.scale(background_image, (800, 800))
+
+        # Affichez l'image de fond
+        fenetre.blit(background_image, (0, 0))
         pygame.display.flip()
         
             
@@ -230,12 +267,16 @@ def run()-> None:
         print("back againihougiu")
         c = Client()
 
+        #thread rende_waiting
+        #render_thread = threading.Thread(target=Fenetre.render_waiting)
+        #render_thread.start()
+
         while True: #att de recevoir un premier message du server - contenant le nombre de joueur pour modifier matrice - avant de continuer
             nombre_joueur = c.client_socket.recv(1024).decode('utf-8')
             print(f'nombre_joueur : {nombre_joueur}')
             if nombre_joueur:
                 break
-
+        #pygame.quit() #pour fermer la fenetre de chargement
         f = Fenetre(int(nombre_joueur))
 
         #1er message server et attribution des couleurs
