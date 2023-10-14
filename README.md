@@ -17,19 +17,25 @@ To use the game follow these steps :
 
 
 __Installation__
-* Open the file "Server.py" 
-  * Choose the number of players in the "Hand"
-  * Put the right ip that will host the server the time of the part "host = "x.x.x.x""
+1. Make sure you have the following dependencies installed : 
+   ```shell
+   pip install -r requirements.txt 
+
+2. Open the file "network.py"
+  * Put the right ip that will host the server the time of the parts "host = "x.x.x.x""
   * Put a chosen port "port = xxxx"
-* Open a "Client.py" file by desired players
-  * Put the right ip that host the server "host = "x.x.x.x""
-  * Put the right port "port = xxxx"
 
 __Usage__
-* Make sure that the file "Server.py" is launched
-* Launch each one "Client.py" file per player
-  * When the right number of players are connected, the game will start
- *  At the time of the launch of the game you will see your color highlighted on the screen remember the good it is important !
+* Make sure that the file "testserv.py" is launched and use arguments to choose the number of players in this server
+  ```shell
+   python testserv.py 2
+  
+* Launch each one "client.py" file per player on computers using the same WiFi network
+  ```shell
+   python client.py 
+  
+* When the right number of players are connected, the game will start
+*  At the time of the launch of the game you will see your color highlighted on the screen remember the good it is important !
 * You will appear in different places of the map, use the arrow keys to orient yourself
 * At the end of the game the ranking is displayed, you can either quit the game or want to replay (follow the instructions)
 
