@@ -7,13 +7,17 @@ import random
 import numpy as np 
 import threading
 
+import sys
+sys.path.append("..")  #répertoire racine pour avoir accés au dossier network
+from network import network
+
 
 ###################
 
 #'stan ip' : 172.21.72.136
 # art ip : 172.21.72.105
-host_ip = ''
-port = 1995
+host_ip = network.host_ip
+port = network.port
 #nombre_joueur = 3 #pour la taille matrice
 
 ###################
@@ -141,10 +145,6 @@ class Fenetre:
     def render_endgame(self, classement_joueurs: list, color_dict: dict, c: "Client"):
         self.fenetre.fill((255, 255, 255))
 
-        print(f"   uidgviduscbsiubc {classement_joueurs}")
-        #classement_joueurs = classement_joueurs.reverse()
-        print(f"   uidgviduscbsiubc {classement_joueurs}")
-
         y = 100  # Position verticale de départ
 
         # Affiche "Classement final de la partie" en utilisant une police plus grande (font48)
@@ -169,6 +169,13 @@ class Fenetre:
         self.fenetre.blit(message, (50, y + 100))  # Augmentez la position verticale pour le message
 
         pygame.display.flip()
+
+    def render_waiting():
+        fenetre = pygame.display.set_mode((800, 800))
+        fenetre.fill((255, 255, 255))
+        pygame.display.flip()
+
+        
 
 
 
@@ -292,12 +299,15 @@ def run() -> None:
         #thread waiting window
         #render_thread = threading.Thread(target=Fenetre.render_waiting)
         #render_thread.start()
+#
+        #Fenetre.render_waiting()
 
         waiting_for_players = True  # Initialisation du drapeau d'attente
 
         while waiting_for_players:
             # Attendre de recevoir le nombre de joueurs du serveur
             nombre_joueur = c.client_socket.recv(1024).decode('utf-8')
+            print(nombre_joueur)
             if nombre_joueur:
                 waiting_for_players = False  # La condition a été satisfaite, sortez de la boucle
 

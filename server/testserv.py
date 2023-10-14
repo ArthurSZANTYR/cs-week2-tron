@@ -5,6 +5,21 @@ import time
 import numpy as np
 import json
 import queue
+import argparse
+
+import sys
+sys.path.append("..")  # répertoire racine pour acceder au dossier network
+from network import network
+
+# arguments en ligne de commande - nombre de clients sur le serveur
+parser = argparse.ArgumentParser(description='Serveur de jeu Tron')
+parser.add_argument('nombre_clients', type=int, help='Nombre de clients souhaités pour le serveur')
+args = parser.parse_args()
+
+###############################################"
+host = network.host_ip
+port = network.port
+###############################################
 
 
 FPS = 20# Fréquence de vérification (25 fois par seconde)
@@ -247,8 +262,8 @@ def threaded(c, game : Game):
 
 
 def Main():
-    host = ""
-    port = 1995
+    #host = host
+    #port = port
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -257,7 +272,7 @@ def Main():
     s.listen()
 
     def Complet():
-            if len(connected_clients) == 2:
+            if len(connected_clients) == args.nombre_clients:
                 return False
             return True
 
@@ -283,6 +298,7 @@ def Main():
         for client in connected_clients:
             message = str(len(connected_clients)).encode("utf-8")
             client.send(message)
+        #time.sleep(0.2)
         
         game.send_game_state_to_clients()
 
